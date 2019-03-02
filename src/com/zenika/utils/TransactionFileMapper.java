@@ -12,11 +12,11 @@ import java.util.regex.Pattern;
 
 public class TransactionFileMapper {
 
-    private static String STAGE_1_SUB8DIRECTORY = "stage1" ;
+    private static String STAGE_1_SUBDIRECTORY = "stage1" ;
 
     private File file ;
-    private Date date ;
-    private DateFormat dateFormat ;
+    private String date ;
+    // private DateFormat dateFormat ;
     private Map<String, BufferedOutputStream> streamMap ;
 
     // Noms de fichiers : transactions_YYYYMMDD.data
@@ -25,29 +25,13 @@ public class TransactionFileMapper {
     public TransactionFileMapper(File file) {
         this.file = file ;
         this.streamMap = new HashMap<>() ;
-        this.dateFormat = new SimpleDateFormat("yyyyMMdd") ;
-    }
-
-    public boolean extractDate() {
-        Pattern p = Pattern.compile("([0-9]{8})") ;
-        Matcher matcher = p.matcher(this.file.getName()) ;
-        if (matcher.find()) {
-            String dateString = matcher.group(1) ;
-            try {
-                this.date = this.dateFormat.parse(dateString) ;
-                return true ;
-            } catch (ParseException e) {
-                System.out.println("Format of date is incorrect");
-                return false ;
-            }
-        } else {
-            return false ;
-        }
+        this.date = FilenameUtil.extractDate(this.file.getName()) ;
+        // this.dateFormat = new SimpleDateFormat("yyyyMMdd") ;
     }
 
     public void processTransactionFile() throws IOException {
 
-        File stage1Directory = new File(STAGE_1_SUB8DIRECTORY) ;
+        File stage1Directory = new File(STAGE_1_SUBDIRECTORY) ;
         if (!stage1Directory.exists()) {
             stage1Directory.mkdir();
         }
@@ -61,7 +45,7 @@ public class TransactionFileMapper {
                 String qte = currentLine[4] ;
                 BufferedOutputStream outputStream = this.streamMap.get(magasin) ;
                 if (outputStream == null) {
-                    File currFile = new File(STAGE_1_SUB8DIRECTORY, "listing_produit-".concat(magasin).concat("_").concat(this.dateFormat.format(this.date)).concat(".stage1")) ;
+                    File currFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-".concat(magasin).concat("_").concat(this.date).concat(".stage1")) ;
                     currFile.createNewFile() ;
                     outputStream = new BufferedOutputStream(new FileOutputStream(currFile)) ;
                     this.streamMap.put(magasin, outputStream) ;
