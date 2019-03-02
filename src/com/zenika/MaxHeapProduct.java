@@ -4,15 +4,15 @@ package com.zenika;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MaxHeapProduct {
+public class MaxHeapProduct<T extends Comparable<T>> {
     private String[] Heap;
     private int size;
-    private Map<String, Integer> productMap ;
+    private Map<String, T> productMap ;
 
     // Constructor to initialize an
     // empty max heap with given maximum
     // capacity.
-    public MaxHeapProduct(Map<String,Integer> productMap) {
+    public MaxHeapProduct(Map<String,T> productMap) {
         this.productMap = productMap ;
         this.size = productMap.size();
         Heap = new String[this.size];
@@ -56,11 +56,11 @@ public class MaxHeapProduct {
         int r = rightChild(i) ;
 
         // If left child is larger than root
-        if (l < this.size && productMap.get(Heap[l]) > productMap.get(Heap[largest]))
+        if (l < this.size && productMap.get(Heap[l]).compareTo(productMap.get(Heap[largest])) == 1)
             largest = l;
 
         // If right child is larger than largest so far
-        if (r < this.size && productMap.get(Heap[r]) > productMap.get(Heap[largest]))
+        if (r < this.size && productMap.get(Heap[r]).compareTo(productMap.get(Heap[largest]))== 1)
             largest = r;
 
         // If largest is not root
@@ -124,6 +124,41 @@ public class MaxHeapProduct {
 
         MaxHeapProduct maxHeap = new MaxHeapProduct(testMagasin) ;
         maxHeap.print();
-        maxHeap.extractTopN(9);
+        String[] result = maxHeap.extractTopN(9);
+        for (int i=0; i<result.length;i++) {
+            System.out.print(result[i]+";");
+        }
+        System.out.println();
+
+        for (int i=0; i<result.length;i++) {
+            System.out.print(maxHeap.productMap.get(result[i])+";");
+        }
+
+        System.out.println();
+
+
+        HashMap<String, Float> testMagasinFloat = new HashMap<>() ;
+        testMagasinFloat.put("a", new Float(5.2)) ;
+        testMagasinFloat.put("b", new Float(3.2)) ;
+        testMagasinFloat.put("c", new Float(17.2)) ;
+        testMagasinFloat.put("d", new Float(10.2)) ;
+        testMagasinFloat.put("e", new Float(84.2)) ;
+        testMagasinFloat.put("f", new Float(19.2)) ;
+        testMagasinFloat.put("g", new Float(6.2)) ;
+        testMagasinFloat.put("h", new Float(22.2)) ;
+        testMagasinFloat.put("i", new Float(9.2)) ;
+
+        MaxHeapProduct maxHeapFloat = new MaxHeapProduct(testMagasin) ;
+        maxHeap.print();
+        String[] resultFloat = maxHeapFloat.extractTopN(9);
+        for (int i=0; i<resultFloat.length;i++) {
+            System.out.print(resultFloat[i]+";");
+        }
+
+        System.out.println();
+        for (int i=0; i<resultFloat.length;i++) {
+            System.out.print(maxHeapFloat.productMap.get(resultFloat[i])+";");
+        }
+
     }
 }
