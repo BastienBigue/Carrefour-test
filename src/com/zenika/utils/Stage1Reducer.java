@@ -88,9 +88,9 @@ public class Stage1Reducer {
         String outputFile  = TOP_100_VENTES.concat("_").concat(this.magasin).concat("_").concat(this.date).concat(".data");
         String outputLine = null ;
 
-        File stage2Directory = new File(RESULT_SUBDIRECTORY);
-        if (!stage2Directory.exists()) {
-            stage2Directory.mkdir();
+        File resultDirectory = new File(RESULT_SUBDIRECTORY);
+        if (!resultDirectory.exists()) {
+            resultDirectory.mkdir();
         }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(new File (RESULT_SUBDIRECTORY, outputFile)))) {
