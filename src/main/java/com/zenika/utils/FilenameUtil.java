@@ -1,10 +1,7 @@
-package com.zenika.utils;
+package main.java.com.zenika.utils;
 
-import java.io.File;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +9,7 @@ public class FilenameUtil {
 
     private static DateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd") ;
 
-    private static String DATE_REGEXP = "([0-9]{8})" ;
+    private static String DATE_REGEXP = "([0-9]{8})\\." ;
     private static String MAGASINID_REGEXP = "([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})" ;
 
     private static Pattern dateRegExpPattern = Pattern.compile(DATE_REGEXP) ;
