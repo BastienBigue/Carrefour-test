@@ -1,18 +1,13 @@
-package com.zenika.utils;
+package main.java.com.zenika.utils;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class TransactionFileMapper {
 
     private static String STAGE_1_SUBDIRECTORY = "stage1" ;
+    private static String DATA_BASTIEN_SUBDIRECTORY = "bastien_data" ;
 
     private File file ;
     private String date ;
@@ -57,6 +52,19 @@ public class TransactionFileMapper {
 
             for (BufferedOutputStream currentBuff : this.streamMap.values()) {
                 currentBuff.close();
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        File transactionFile = new File(DATA_BASTIEN_SUBDIRECTORY,"transactions_20190302.data") ;
+
+        TransactionFileMapper mapper = new TransactionFileMapper(transactionFile) ;
+        if (FilenameUtil.extractDate(transactionFile.getName()) != null) {
+            try{
+                mapper.processTransactionFile();
+            } catch (IOException e) {
+                System.out.println("IOException !!!!") ;
             }
         }
     }

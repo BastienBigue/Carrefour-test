@@ -1,17 +1,14 @@
-package com.zenika.utils;
+package main.java.com.zenika.utils;
 
-import com.zenika.MaxHeapProduct;
+import main.java.com.zenika.MaxHeapProduct;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class Stage2Processor {
 
     private static String REFERENTIEL_PRODUIT = "reference_prod" ;
-    private static String REFERENTIEL_PRODUIT_DIR = "data" ;
+    private static String REFERENTIEL_PRODUIT_DIR = "bastien_data" ;
     private static String STAGE_3_SUBDIRECTORY = "stage3" ;
     private static String STAGE_2_SUBDIRECTORY = "stage2" ;
     private static String TOP_100_CA = "top_100_ca" ;
@@ -141,7 +138,7 @@ public class Stage2Processor {
     }
 
     public static void main(String[] args) {
-        File inputFile = new File(STAGE_2_SUBDIRECTORY, "set_produit-2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.stage2") ;
+        File inputFile = new File(STAGE_2_SUBDIRECTORY, "set_produit-0b0abf8c-5efc-464c-8cb4-bce873078508_20190302.stage2") ;
         Stage2Processor.process(inputFile,100);
     }
 }

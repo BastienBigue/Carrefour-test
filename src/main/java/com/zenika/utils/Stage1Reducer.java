@@ -1,14 +1,10 @@
-package com.zenika.utils;
+package main.java.com.zenika.utils;
 
-import com.zenika.MaxHeapProduct;
-import javafx.stage.Stage;
+import main.java.com.zenika.MaxHeapProduct;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.function.Function;
 
 /**
     Cette classe prend un fichier issu du stage 1
@@ -121,7 +117,7 @@ public class Stage1Reducer {
 
 
     public static void main(String[] args) {
-        File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.stage1") ;
+        File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-0b0abf8c-5efc-464c-8cb4-bce873078508_20190302.stage1") ;
         Stage1Reducer.reduce(inputFile,100);
     }
 }
