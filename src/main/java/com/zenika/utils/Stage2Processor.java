@@ -92,7 +92,7 @@ public class Stage2Processor {
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             String outputLine = null;
             for (String k : this.productCAMap.keySet()) {
-                outputLine = k.concat("|").concat(String.format ("%.2f", this.productCAMap.get(k)));
+                outputLine = k.concat("|").concat(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
