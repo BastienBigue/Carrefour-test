@@ -31,7 +31,6 @@ public class Stage2Processor {
         this.magasin = FilenameUtil.extractMagasinId(this.setProductFile.getName()) ;
         this.topN = topN ;
         this.refPrixFile = FileBuilder.createReferenceProdFile(magasin,date) ;
-        //new File(REFERENTIEL_PRODUIT_DIR, REFERENTIEL_PRODUIT.concat("-").concat(magasin).concat("_").concat(date).concat(".data")) ;
         this.reBuildQteMap();
     }
 
@@ -54,7 +53,7 @@ public class Stage2Processor {
             System.out.println("IO EXCEPTION ; " + currentFunction );
         }
         long end =  System.currentTimeMillis();
-        System.out.println("BuildMap from stage1 file took " + String.valueOf(end-start) + "ms");
+        //DEBUG System.out.println("BuildMap from stage1 file took " + String.valueOf(end-start) + "ms");
 
     }
 
@@ -88,7 +87,7 @@ public class Stage2Processor {
             this.productCAMap.remove(unknownPrice) ;
         }
         long end = System.currentTimeMillis();
-        System.out.println("Compute CA for all products took " + String.valueOf(end-start) + "ms");
+        //DEBUG System.out.println("Compute CA for all products took " + String.valueOf(end-start) + "ms");
     }
 
     private void writeStage3File() {
@@ -99,7 +98,6 @@ public class Stage2Processor {
         }
 
         File outputFile = FileBuilder.createStage3File(this.magasin,this.date) ;
-        System.out.println(outputFile.getAbsolutePath());
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             String outputLine = null;
             for (String k : this.productCAMap.keySet()) {
@@ -113,7 +111,7 @@ public class Stage2Processor {
             System.out.println("IO EXCEPTION");
         }
         long end = System.currentTimeMillis();
-        System.out.println("Write stage3 file took " + String.valueOf(end-start) + "ms");
+        //DEBUG System.out.println("Write stage3 file took " + String.valueOf(end-start) + "ms");
     }
 
     private String[] getTopN() {
@@ -121,7 +119,7 @@ public class Stage2Processor {
         MaxHeapProduct maxHeap = new MaxHeapProduct(this.productCAMap) ;
         String[] result = maxHeap.extractTopN(this.topN) ;
         long end = System.currentTimeMillis();
-        System.out.println("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
+        //DEBUG System.out.println("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
         return result ;
     }
 
@@ -147,7 +145,7 @@ public class Stage2Processor {
             System.out.println("IO EXCEPTION ; " + currentFunction );
         }
         long end = System.currentTimeMillis();
-        System.out.println("Write top_N_ca file took " + String.valueOf(end-start)+ "ms");
+        //DEBUG System.out.println("Write top_N_ca file took " + String.valueOf(end-start)+ "ms");
     }
 
     public Map<String, Float> process() {

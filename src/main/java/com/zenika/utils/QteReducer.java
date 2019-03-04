@@ -73,8 +73,6 @@ public class QteReducer {
 
         String outputLine = null ;
 
-        System.out.println(outputTopNSortedFile.getAbsolutePath());
-
         File resultDirectory = new File(outputTopNSortedFile.getParent());
         if (!resultDirectory.exists()) {
             resultDirectory.mkdir();

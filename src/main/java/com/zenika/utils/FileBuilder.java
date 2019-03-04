@@ -53,11 +53,11 @@ public class FileBuilder {
         return new File(FilenameUtil.STAGE4_4, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE4_4)) ;
     }
 
-    public static File createStage5_1File(String magasin, String date) {
+    public static File createStage5_1File(String date) {
         return new File(FilenameUtil.STAGE5_1, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_1)) ;
     }
 
-    public static File createStage5_2File(String magasin, String date) {
+    public static File createStage5_2File(String date) {
         return new File(FilenameUtil.STAGE5_2, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_2)) ;
     }
 
