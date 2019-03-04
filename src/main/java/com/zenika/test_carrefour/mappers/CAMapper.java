@@ -1,14 +1,11 @@
-package com.zenika.mappers;
+package com.zenika.test_carrefour.mappers;
 
-import com.zenika.config.CommonConfig;
-import com.zenika.data.MaxHeapProduct;
+import com.zenika.test_carrefour.config.CommonConfig;
+import com.zenika.test_carrefour.data.MaxHeapProduct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
@@ -17,6 +14,8 @@ import java.util.Locale;
 
 public class CAMapper {
 
+    static Logger log = LogManager.getLogger(CAMapper.class);
+
     private Map<String, Float> productCAMap ;
     private File setProductFile ;
     private int topN ;
@@ -24,7 +23,6 @@ public class CAMapper {
     private File outputFullFile ;
     private File outputTopNSortedFile ;
 
-    // On pourrait passer la map en arguement pour pas avoir à la recréer
     public CAMapper(File refPrixFile, File setProductFile, int topN, File outputFullFile, File outputTopNSortedFile) {
         this.outputFullFile = outputFullFile;
         this.outputTopNSortedFile = outputTopNSortedFile;
@@ -48,13 +46,17 @@ public class CAMapper {
                 qte = Float.valueOf(currentLine[1]);
                 this.productCAMap.put(product, this.productCAMap.getOrDefault(product, 0f) + qte);
             }
+        } catch (FileNotFoundException f) {
+            log.error("CAMapper could not find file : " + setProductFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when reading file " + setProductFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
         long end =  System.currentTimeMillis();
-        //DEBUG System.out.println("BuildMap from stage1 file took " + String.valueOf(end-start) + "ms");
-
+        log.debug("reBuildQteMap using stage1 file took " + String.valueOf(end-start) + "ms");
     }
 
     private void buildCAMap() {
@@ -67,7 +69,6 @@ public class CAMapper {
 
         try (BufferedReader br = new BufferedReader(new FileReader(refPrixFile))) {
             for (String line; (line = br.readLine()) != null; ) {
-                // Pas besoin de précompiler la regexp : ce n'est pas une regexp qui est utilisée car le pattern ne contient qu'un seul caractère.
                 currentLine = line.split("\\|");
                 product = currentLine[0];
                 unitPrice = Float.valueOf(currentLine[1]);
@@ -77,7 +78,12 @@ public class CAMapper {
                     productToRemove.remove(product) ;
                 }
             }
-        }  catch (IOException e) {
+        } catch(FileNotFoundException f) {
+            log.error("CAMapper could not find file : " + refPrixFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
+        } catch (IOException e) {
+            log.error("Error when reading file " + refPrixFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
@@ -85,9 +91,10 @@ public class CAMapper {
         for(Iterator<String> it = productToRemove.iterator(); it.hasNext();) {
             String unknownPrice = it.next() ;
             this.productCAMap.remove(unknownPrice) ;
+            log.info("Removing product " + unknownPrice + "from list because no price has been found in " + this.refPrixFile + " prod file");
         }
         long end = System.currentTimeMillis();
-        //DEBUG System.out.println("Compute CA for all products took " + String.valueOf(end-start) + "ms");
+        log.debug("Compute CA for all products took " + String.valueOf(end-start) + "ms");
     }
 
     private void writeStage3File() {
@@ -102,16 +109,19 @@ public class CAMapper {
             for (String k : this.productCAMap.keySet()) {
                 outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
                 bo.write(outputLine.getBytes());
-                //StringBuilder sb = new StringBuilder().append(k).append(CSV_SEPARATOR).append(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
-                //bo.write(sb.toString().getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
+        } catch(FileNotFoundException f) {
+            log.error("CAMapper could not find file : " + outputFullFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when writing file " + outputFullFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
         long end = System.currentTimeMillis();
-        //DEBUG System.out.println("Write stage3 file took " + String.valueOf(end-start) + "ms");
+        log.debug("Write file " + this.outputFullFile + "file took " + String.valueOf(end-start) + "ms");
     }
 
     private String[] getTopN() {
@@ -119,7 +129,7 @@ public class CAMapper {
         MaxHeapProduct maxHeap = new MaxHeapProduct(this.productCAMap) ;
         String[] result = maxHeap.extractTopN(this.topN) ;
         long end = System.currentTimeMillis();
-        //DEBUG System.out.println("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
+        log.debug("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
         return result ;
     }
 
@@ -138,12 +148,17 @@ public class CAMapper {
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
+        } catch(FileNotFoundException f) {
+            log.error("CAMapper could not find file : " + outputTopNSortedFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
         long end = System.currentTimeMillis();
-        //DEBUG System.out.println("Write top_N_ca file took " + String.valueOf(end-start)+ "ms");
+        log.debug("Write file " + this.outputTopNSortedFile + "took " + String.valueOf(end-start)+ "ms");
     }
 
     public Map<String, Float> process() {

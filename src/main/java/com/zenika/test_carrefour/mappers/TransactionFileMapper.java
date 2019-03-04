@@ -1,20 +1,21 @@
-package com.zenika.mappers;
+package com.zenika.test_carrefour.mappers;
 
-import com.zenika.config.CommonConfig;
-import com.zenika.utils.FileBuilder;
-import com.zenika.utils.FilenameUtil;
+import com.zenika.test_carrefour.config.CommonConfig;
+import com.zenika.test_carrefour.utils.FileBuilder;
+import com.zenika.test_carrefour.utils.FilenameUtil;
 
-import java.io.File;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+
 public class TransactionFileMapper {
+
+    static Logger log = LogManager.getLogger(TransactionFileMapper.class);
 
     private File file ;
     private String date ;
@@ -57,7 +58,12 @@ public class TransactionFileMapper {
             for (BufferedOutputStream currentBuff : this.streamMap.values()) {
                 currentBuff.close();
             }
+        } catch (FileNotFoundException e) {
+            log.error("Error when processing transactionFile : could not find input or output file -- Exit");
+            e.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when reading " + this.file + "or when writing to one of the stage2 output files -- Exit");
             e.printStackTrace();
             System.exit(1);
         }

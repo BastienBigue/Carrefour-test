@@ -1,6 +1,7 @@
-package com.zenika.utils;
+package com.zenika.test_carrefour.utils;
 
-import com.zenika.config.CommonConfig;
+import com.zenika.test_carrefour.config.CommonConfig;
+
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

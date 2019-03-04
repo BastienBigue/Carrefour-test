@@ -1,24 +1,27 @@
-package com.zenika.reducers;
+package com.zenika.test_carrefour.reducers;
 
-import com.zenika.config.CommonConfig;
-import com.zenika.data.MaxHeapProduct;
-import java.io.FileOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.*;
+import com.zenika.test_carrefour.config.CommonConfig;
+import com.zenika.test_carrefour.data.MaxHeapProduct;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class CAReducer {
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
+
+public class QteReducer {
+
+    static Logger log = LogManager.getLogger(QteReducer.class);
 
     private Set<File> filesToAggregate ;
-    private Map<String, Float> productMap ;
+    private Map<String, Integer> productMap ;
     private int topN ;
     private File outputFullFile ;
     private File outputTopNSortedFile ;
 
-    public CAReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
+    public QteReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
         this.topN = topN ;
         this.outputFullFile = outputFullFile ;
         this.outputTopNSortedFile = outputTopNSortedFile ;
@@ -26,10 +29,11 @@ public class CAReducer {
         this.productMap = new HashMap<>() ;
     }
 
-    private void buildMap() throws IOException {
+    private void buildMap() {
+        long start = System.currentTimeMillis();
 
         String product;
-        Float ca;
+        Integer qte;
         String[] currentLine;
 
         for (File currFile : filesToAggregate) {
@@ -37,43 +41,64 @@ public class CAReducer {
                 for (String line; (line = br.readLine()) != null; ) {
                     currentLine = line.split("\\|");
                     product = currentLine[0];
-                    ca =  Float.valueOf(currentLine[1]);
-                    this.productMap.put(product, this.productMap.getOrDefault(product, 0f) + ca);
+                    qte = Integer.valueOf(currentLine[1]);
+                    this.productMap.put(product, this.productMap.getOrDefault(product, 0) + qte);
                 }
+            } catch(FileNotFoundException f) {
+                log.error("QteReducer could not find file : " + currFile.getName() + "-- Exit");
+                f.printStackTrace();
+                System.exit(1);
+            } catch (IOException e) {
+                log.error("Error when reading file " + currFile.getName() + "-- Exit");
+                e.printStackTrace();
+                System.exit(1);
             }
         }
+        long end = System.currentTimeMillis();
+        log.debug("buildMap took " + String.valueOf(end-start) + "ms");
     }
 
     private void writeFullFile() {
-
+        long start = System.currentTimeMillis();
         File stage2Directory = new File(outputFullFile.getParent());
         if (!stage2Directory.exists()) {
             stage2Directory.mkdirs();
         }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
-            String outputLine ;
+            String outputLine = null;
             for (String k : this.productMap.keySet()) {
-                outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(String.format(Locale.US, "%.2f", this.productMap.get(k)));
+                outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(this.productMap.get(k).toString());
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
+        } catch(FileNotFoundException f) {
+            log.error("QteReducer could not find file : " + outputFullFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when writing file " + outputFullFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
+        long end = System.currentTimeMillis();
+        log.debug("Write file " + outputFullFile + " took " + String.valueOf(end-start) + "ms");
     }
+
 
     private String[] getTopN() {
+        long start = System.currentTimeMillis();
         MaxHeapProduct maxHeap = new MaxHeapProduct(productMap) ;
-        return maxHeap.extractTopN(this.topN) ;
+        String[] result = maxHeap.extractTopN(this.topN) ;
+        long end = System.currentTimeMillis();
+        log.debug("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
+        return result ;
     }
-
 
 
     private void writeSortedResultFile(String[] result) {
-
-        String outputLine ;
+        long start = System.currentTimeMillis();
+        String outputLine = null ;
 
         File resultDirectory = new File(outputTopNSortedFile.getParent());
         if (!resultDirectory.exists()) {
@@ -82,28 +107,29 @@ public class CAReducer {
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat(CommonConfig.CSV_SEPARATOR).concat(String.format(Locale.US, "%.2f", this.productMap.get(result[i])));
+                outputLine = result[i].concat(CommonConfig.CSV_SEPARATOR).concat(this.productMap.get(result[i]).toString());
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
+        } catch(FileNotFoundException f) {
+            log.error("QteReducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit");
+            f.printStackTrace();
+            System.exit(1);
         } catch (IOException e) {
+            log.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit");
             e.printStackTrace();
             System.exit(1);
         }
+        long end = System.currentTimeMillis();
+        log.debug("Write file " + outputTopNSortedFile + " took " + String.valueOf(end-start)+ "ms");
 
     }
 
-    public Map<String,Float> reduce() {
-        try {
-            this.buildMap();
-            this.writeFullFile();
-            String [] result = this.getTopN();
-            this.writeSortedResultFile(result);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+    public Map<String,Integer> reduce() {
+        this.buildMap();
+        this.writeFullFile();
+        String [] result = this.getTopN();
+        this.writeSortedResultFile(result);
         return this.productMap ;
     }
 
@@ -123,6 +149,8 @@ public class CAReducer {
         filesToCompute.add(new File("stage2","set_produit-d4bfbabf-0160-4e87-8688-78e0943a396a_20170514.stage2"));
         filesToCompute.add(new File("stage2","set_produit-dd43720c-be43-41b6-bc4a-ac4beabd0d9b_20170514.stage2"));
         filesToCompute.add(new File("stage2","set_produit-e3d54d00-18be-45e1-b648-41147638bafe_20170514.stage2"));
+
+
 
         //File outputFullFile = new File(FilenameUtil.STAGE4_1, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.STAGE4_1)) ;
         //File outputTopNSortedFile = new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.RESULT_VENTES_GLOBAL, 100)) ;

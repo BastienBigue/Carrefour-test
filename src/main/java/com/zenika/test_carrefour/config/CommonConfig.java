@@ -1,4 +1,4 @@
-package com.zenika.config;
+package com.zenika.test_carrefour.config;
 
 
 public class CommonConfig {

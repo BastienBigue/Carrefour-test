@@ -1,4 +1,4 @@
-package com.zenika.utils;
+package com.zenika.test_carrefour.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -1,9 +1,15 @@
-package com.zenika.data;
+package com.zenika.test_carrefour.data;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class MaxHeapProduct<T extends Comparable<T>> {
+
+    static Logger log = LogManager.getLogger(MaxHeapProduct.class);
+
     private String[] Heap;
     private int size;
     private Map<String, T> productMap ;
@@ -81,14 +87,14 @@ public class MaxHeapProduct<T extends Comparable<T>> {
 
 
     private void buildTree() {
-        //DEBUG long start = System.currentTimeMillis() ;
+        long start = System.currentTimeMillis() ;
         Heap = this.productMap.keySet().toArray(new String[0]) ;
 
         for (int i = Math.floorDiv(this.size,2)-1; i>=0 ; i--) {
             this.heapify(i);
         }
-        //DEBUG long end = System.currentTimeMillis() ;
-        //DEBUG System.out.println("Building binary heap duration = " + String.valueOf(end-start) + "ms");
+        long end = System.currentTimeMillis() ;
+        log.debug("Build binary tree took " + String.valueOf(end-start) + "ms");
     }
 
     // Remove an element from max heap
@@ -101,15 +107,12 @@ public class MaxHeapProduct<T extends Comparable<T>> {
 
     //Returns topN elements from array. Removes them.
     public String[] extractTopN(int topN) {
-        // DEBUG long start = System.currentTimeMillis() ;
         String [] result  = new String[topN];
         String currMax = null ;
         for (int i = 0; i < topN ; i++) {
             currMax =  this.extractMax() ;
             result[i] = currMax;
         }
-        //DEBUG long end = System.currentTimeMillis();
-        //DEBUG System.out.println("Extract top " + topN + " elements duration = " + String.valueOf(end-start) + "ms");
         return result ;
     }
 
