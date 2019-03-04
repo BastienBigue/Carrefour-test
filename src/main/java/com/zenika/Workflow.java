@@ -270,13 +270,34 @@ public class Workflow {
         logger.info("this is a information log message");
         logger.warn("this is a warning log message");*/
 
-        File transactionFile = new File("data","transactions_20170514.data") ;
+        File transactionFile1 = new File("data","transactions_20170508.data") ;
+        File transactionFile2 = new File("data","transactions_20170509.data") ;
+        File transactionFile3 = new File("data","transactions_20170510.data") ;
+        File transactionFile4 = new File("data","transactions_20170511.data") ;
+        File transactionFile5 = new File("data","transactions_20170512.data") ;
+        File transactionFile6 = new File("data","transactions_20170513.data") ;
+        File transactionFile7 = new File("data","transactions_20170514.data") ;
 
-        long start = System.currentTimeMillis();
+        List<File> allFiles = new ArrayList<>();
 
-        Workflow.oneTransactionFileModeJob(transactionFile,100);
-        long end = System.currentTimeMillis();
-        System.out.println("workflow took " + String.valueOf(end-start) + "ms");
+        allFiles.add(transactionFile1) ;
+        allFiles.add(transactionFile2) ;
+        allFiles.add(transactionFile3) ;
+        allFiles.add(transactionFile4) ;
+        allFiles.add(transactionFile5) ;
+        allFiles.add(transactionFile6) ;
+        allFiles.add(transactionFile7) ;
+
+        for (Iterator<File> itFile = allFiles.iterator(); itFile.hasNext();) {
+            File currFile = itFile.next() ;
+            long start = System.currentTimeMillis();
+
+            Workflow.oneTransactionFileModeJob(currFile,100);
+            long end = System.currentTimeMillis();
+            System.out.println("Workflow took " + String.valueOf(end-start) + "ms for transaction file " + currFile.getName());
+        }
+
+
 
 
         /*System.out.println(transactionFile.getName());
