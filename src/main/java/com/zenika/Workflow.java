@@ -37,97 +37,121 @@ public class Workflow {
     private static String CA = "ca" ;
     private static String VENTES = "ventes" ;
 
-    public static void oneTransactionFileModeJob(File transactionFile, int topN) {
+    public static Set<String>  computeStage1(File transactionFile) {
+        System.out.println("Starting compute of Stage1 ");
+        long start = System.currentTimeMillis();
 
-        /*
-        Process given transaction file.
-         */
-        TransactionFileMapper mapper = new TransactionFileMapper(transactionFile) ;
-        String dateString = FilenameUtil.extractDate(transactionFile.getName());
+        TransactionFileMapper mapper = new TransactionFileMapper(transactionFile);
         Set<String> magasinsId = mapper.processTransactionFile();
 
+        long end = System.currentTimeMillis();
+        System.out.println("computeStage1 took " + String.valueOf(end-start) + " ms");
+        return magasinsId;
+    }
 
+    public static Map<String, Integer> computeStage2(String magasinId, String dateString, int topN) {
+        System.out.println("Starting compute of Stage2 ");
 
+        File stage1File = FileBuilder.createStage1File(magasinId, dateString);
+        Set<File> stage1FileSet = new HashSet<File>();
+        stage1FileSet.add(stage1File) ;
 
-        /*
-        For each magasin present in transaction file for date D, compute VENTES and CA files
-         */
-        for (Iterator<String> it = magasinsId.iterator(); it.hasNext();) {
-            String magasinId = it.next() ;
+        File stage2File = FileBuilder.createStage2File(magasinId, dateString);
+        QteReducer reducerQtePerMagasin = new QteReducer(stage1FileSet, topN,
+                stage2File,
+                FileBuilder.createVenteMagasinFile(magasinId, dateString, topN));
+        Map<String, Integer> productQteMap = reducerQtePerMagasin.reduce();
+        return productQteMap;
+    }
 
-            Set<File> magasinFileSet = new HashSet<>() ;
-            magasinFileSet.add(FileBuilder.createStage1File(magasinId, dateString));
+    public static Map<String, Float> computeStage3(String magasinId, String dateString, int topN) {
+        System.out.println("Starting compute of Stage3 ");
 
-            /*
-            Compute stage2 file :
-             */
-            File stage2File = FileBuilder.createStage2File(magasinId, dateString) ;
-            QteReducer reducerQtePerMagasin = new QteReducer(magasinFileSet, topN,
-                    stage2File,
-                    FileBuilder.createVenteMagasinFile(magasinId,dateString,topN));
-            Map<String, Integer> productQteMap = reducerQtePerMagasin.reduce();
+        Stage2Processor processor = new Stage2Processor(magasinId, dateString, topN);
+        Map<String, Float> productCAMap = processor.process();
+        return productCAMap ;
+    }
 
-
-            /*
-            Compute stage3 file
-             */
-            Stage2Processor processor1 = new Stage2Processor(magasinId, dateString,topN) ;
-            processor1.process();
-
-            /*
-            Process Stage 4_3 file
-            */
-            System.out.println("Starting compute of Stage4_3 ");
-            File stage4_3File = FileBuilder.createStage4_3File(magasinId,dateString) ;
-
-            try {
-                Set<File> stage2Last7DaysFiles  = FileBuilder.createStage2Last7DaysFiles(magasinId, dateString);
-                System.out.println("here");
-                if (Workflow.allFilesExist(stage2Last7DaysFiles)) {
-                    System.out.println("here");
-                    QteReducer reducerQteFor7J = new QteReducer(stage2Last7DaysFiles, topN, stage4_3File, FileBuilder.createVenteMagasin7JFile(magasinId, dateString, topN));
-                    reducerQteFor7J.reduce();
-                } else {
-                    System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage4_3 ");
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
+    public static Map<String, Integer> computeStage4_3(String magasinId, String dateString, int topN) {
+        System.out.println("Starting compute of Stage4_3 ");
+        File stage4_3File = FileBuilder.createStage4_3File(magasinId, dateString);
+        Map<String, Integer> productVenteGlobal7JMap = null ;
+        try {
+            Set<File> stage2Last7DaysFiles = FileBuilder.createStage2Last7DaysFiles(magasinId, dateString);
+            if (Workflow.allFilesExist(stage2Last7DaysFiles)) {
+                QteReducer reducerQteFor7J = new QteReducer(stage2Last7DaysFiles, topN, stage4_3File, FileBuilder.createVenteMagasin7JFile(magasinId, dateString, topN));
+                productVenteGlobal7JMap = reducerQteFor7J.reduce();
+            } else {
+                System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage4_3 ");
             }
 
-            /*
-            Process Stage 4_4 file
-             */
-            //Voir comment faire un CAReducer
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return productVenteGlobal7JMap;
+    }
+
+    public static Map<String, Float> computeStage4_4(String magasinId, String dateString, int topN) {
+        System.out.println("Starting compute of Stage4_4 ");
+        File stage4_4File = FileBuilder.createStage4_4File(magasinId, dateString);
+        Map<String, Float> productCAGlobal7JMap = null ;
+        try {
+            Set<File> stage3Last7DaysFiles = FileBuilder.createStage3Last7DaysFiles(magasinId, dateString);
+            if (Workflow.allFilesExist(stage3Last7DaysFiles)) {
+                CAReducer reducerCAFor7J = new CAReducer(stage3Last7DaysFiles, topN, stage4_4File, FileBuilder.createCAMagasin7JFile(magasinId, dateString, topN));
+                productCAGlobal7JMap = reducerCAFor7J.reduce();
+            } else {
+                System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage4_4 ");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return productCAGlobal7JMap;
+    }
+
+    public static Map<String, Integer> computeStage4_1(Set<String> magasinsIdToGlobal, String dateString, int topN) {
+        System.out.println("Starting compute of Stage4_1 ");
+        Set<File> allMagasinsVenteFiles = new HashSet<>();
+        Map<String, Integer> productVenteGlobal = null ;
+        for (Iterator<String> it = magasinsIdToGlobal.iterator(); it.hasNext(); ) {
+            String magasin = it.next();
+            allMagasinsVenteFiles.add(FileBuilder.createStage2File(magasin, dateString));
         }
 
-        /*
-        Process Stage 4_1 file
-         */
-        System.out.println("Starting compute of Stage4_1 ");
-        Set<File> allMagasinsFiles = new HashSet<>() ;
-        for (Iterator<String> it = magasinsId.iterator(); it.hasNext();) {
-            String magasin = it.next();
-            allMagasinsFiles.add(FileBuilder.createStage2File(magasin,dateString)) ;
-        }
-        if (allFilesExist(allMagasinsFiles)) {
+        if (allFilesExist(allMagasinsVenteFiles)) {
             File stage4_1File = FileBuilder.createStage4_1File(dateString);
-            QteReducer reducerVenteGlobal = new QteReducer(allMagasinsFiles , topN, stage4_1File, FileBuilder.createVenteGlobalFile(dateString, topN));
-            reducerVenteGlobal.reduce();
+            QteReducer reducerVenteGlobal = new QteReducer(allMagasinsVenteFiles, topN, stage4_1File, FileBuilder.createVenteGlobalFile(dateString, topN));
+            productVenteGlobal = reducerVenteGlobal.reduce();
         } else {
             System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage4_1 ");
         }
+        return productVenteGlobal ;
+    }
 
-        /*
-        Process 4_2 file
-         */
-        //Voir comment faire un CAReducer
+    public static Map<String, Float> computeStage4_2(Set<String> magasinsIdToGlobal, String dateString, int topN) {
+        System.out.println("Starting compute of Stage4_2 ");
+        Set<File> allMagasinsCAFiles = new HashSet<>() ;
+        Map<String, Float> productCAGlobal = null ;
 
-        /*
-        Process 5_1 file
-         */
+        for (Iterator<String> it = magasinsIdToGlobal.iterator(); it.hasNext(); ) {
+            String magasin = it.next();
+            allMagasinsCAFiles.add(FileBuilder.createStage3File(magasin, dateString));
+        }
+
+        if (allFilesExist(allMagasinsCAFiles)) {
+            File stage4_2File = FileBuilder.createStage4_2File(dateString);
+            CAReducer reducerCAGlobal = new CAReducer(allMagasinsCAFiles, topN, stage4_2File, FileBuilder.createCAGlobalFile(dateString, topN));
+            productCAGlobal = reducerCAGlobal.reduce();
+        } else {
+            System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage4_1 ");
+        }
+        return productCAGlobal;
+    }
+
+    public static void computeStage5_1(String dateString, int topN) {
         System.out.println("Starting compute of Stage5_1 ");
-        File stage5_1File = FileBuilder.createStage4_1File(dateString);
+        File stage5_1File = FileBuilder.createStage5_1File(dateString);
         try {
             Set<File> stage4_1Last7DaysFiles = FileBuilder.createStage4_1Last7DaysFiles(dateString);
             if (Workflow.allFilesExist(stage4_1Last7DaysFiles)) {
@@ -140,14 +164,90 @@ public class Workflow {
             e.printStackTrace();
         }
 
+    }
+
+    public static void computeStage5_2(String dateString, int topN) {
+        System.out.println("Starting compute of Stage5_1 ");
+        File stage5_2File = FileBuilder.createStage5_2File(dateString);
+        try {
+            Set<File> stage4_2Last7DaysFiles = FileBuilder.createStage4_2Last7DaysFiles(dateString);
+            if (Workflow.allFilesExist(stage4_2Last7DaysFiles)) {
+                CAReducer reducerCAGlobalFor7J = new CAReducer(stage4_2Last7DaysFiles, topN, stage5_2File, FileBuilder.createCAGlobal7JFile(dateString, topN));
+                reducerCAGlobalFor7J.reduce();
+            } else {
+                System.out.println("Tous les fichiers n'existent pas pour créer le fichier stage5_2 ");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public static void oneTransactionFileModeJob(File transactionFile, int topN) {
+
+        /*
+        Process given transaction file.
+         */
+        String dateString = FilenameUtil.extractDate(transactionFile.getName());
+        Set<String> magasinsIdInTransactionFile = Workflow.computeStage1(transactionFile) ;
+
+
+
+
+        /*
+        For each magasin present in transaction file for date D, compute VENTES and CA files
+         */
+        for (Iterator<String> it = magasinsIdInTransactionFile.iterator(); it.hasNext(); ) {
+            String magasinId = it.next();
+            //TODO use Map/Set produced
+            //TODO refactor CA/Qte REducers
+            /*
+            Compute stage2 file :
+             */
+            Workflow.computeStage2(magasinId,dateString, topN);
+
+            /*
+            Compute stage3 file
+             */
+            Workflow.computeStage3(magasinId,dateString,topN);
+
+            /*
+            Process Stage 4_3 file
+            */
+            Workflow.computeStage4_3(magasinId,dateString,topN);
+
+            /*
+            Process Stage 4_4 file
+             */
+            Workflow.computeStage4_4(magasinId,dateString,topN);
+
+        }
+
+        /*
+        Process stage4_1 file
+         */
+        Workflow.computeStage4_1(magasinsIdInTransactionFile, dateString,topN);
+
+
+        /*
+        Process 4_2 file
+         */
+        Workflow.computeStage4_2(magasinsIdInTransactionFile,dateString,topN);
+
+
+
+
+        /*
+        Process 5_1 file
+         */
+        Workflow.computeStage5_1(dateString,topN);
+
 
         /*
         Process 5_2 file
          */
-        //Voir comment faire un CAReducer
-
-
-
+        Workflow.computeStage5_2(dateString,topN);
 
 
     }
@@ -158,7 +258,6 @@ public class Workflow {
             File currFile = it.next() ;
             allFilesExists = allFilesExists && currFile.exists() ;
         }
-        System.out.println(allFilesExists);
         return allFilesExists;
 
     }
