@@ -53,7 +53,7 @@ public class CAReducer {
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
             String outputLine = null;
             for (String k : this.productMap.keySet()) {
-                outputLine = k.concat("|").concat(this.productMap.get(k).toString());
+                outputLine = k.concat("|").concat(String.format(Locale.US, "%.2f", this.productMap.get(k)));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
@@ -80,7 +80,7 @@ public class CAReducer {
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat("|").concat(this.productMap.get(result[i]).toString());
+                outputLine = result[i].concat("|").concat(String.format(Locale.US, "%.2f", this.productMap.get(result[i])));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }

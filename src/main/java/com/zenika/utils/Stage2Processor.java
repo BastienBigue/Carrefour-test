@@ -136,7 +136,7 @@ public class Stage2Processor {
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat("|").concat(String.format("%.2f", this.productCAMap.get(result[i])));
+                outputLine = result[i].concat("|").concat(String.format(Locale.US, "%.2f", this.productCAMap.get(result[i])));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
