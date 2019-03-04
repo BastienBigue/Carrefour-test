@@ -167,7 +167,7 @@ public class Workflow {
     }
 
     public static void computeStage5_2(String dateString, int topN) {
-        System.out.println("Starting compute of Stage5_1 ");
+        System.out.println("Starting compute of Stage5_2 ");
         File stage5_2File = FileBuilder.createStage5_2File(dateString);
         try {
             Set<File> stage4_2Last7DaysFiles = FileBuilder.createStage4_2Last7DaysFiles(dateString);
