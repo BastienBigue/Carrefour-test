@@ -3,6 +3,7 @@ package main.java.com.zenika.utils;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class TransactionFileMapper {
 
@@ -24,7 +25,7 @@ public class TransactionFileMapper {
         // this.dateFormat = new SimpleDateFormat("yyyyMMdd") ;
     }
 
-    public void processTransactionFile() throws IOException {
+    public Set<String> processTransactionFile() {
 
         File stage1Directory = new File(STAGE_1_SUBDIRECTORY) ;
         if (!stage1Directory.exists()) {
@@ -53,7 +54,10 @@ public class TransactionFileMapper {
             for (BufferedOutputStream currentBuff : this.streamMap.values()) {
                 currentBuff.close();
             }
+        } catch (IOException e) {
+            System.out.println("IO Exception");
         }
+        return this.streamMap.keySet();
     }
 
     public static void main(String[] args) {
@@ -61,11 +65,10 @@ public class TransactionFileMapper {
 
         TransactionFileMapper mapper = new TransactionFileMapper(transactionFile) ;
         if (FilenameUtil.extractDate(transactionFile.getName()) != null) {
-            try{
+                long start = System.currentTimeMillis() ;
                 mapper.processTransactionFile();
-            } catch (IOException e) {
-                System.out.println("IOException !!!!") ;
-            }
+                long end = System.currentTimeMillis() ;
+                System.out.println("TransactionFile mapper = " + String.valueOf(end-start) + "ms");
         }
     }
 }
