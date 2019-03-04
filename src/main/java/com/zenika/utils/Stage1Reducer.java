@@ -3,8 +3,10 @@ package main.java.com.zenika.utils;
 import main.java.com.zenika.MaxHeapProduct;
 
 import java.io.*;
+import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.SplittableRandom;
 
 /**
     Cette classe prend un fichier issu du stage 1
@@ -27,8 +29,8 @@ public class Stage1Reducer {
     private Map<String, Integer> productQteMap ;
     private int topN ;
 
-    public Stage1Reducer(File file, int topN) {
-        this.listingProductFile = file ;
+    public Stage1Reducer(File listingProductFile, int topN) {
+        this.listingProductFile = listingProductFile ;
         this.productQteMap = new HashMap<>() ;
         this.date  = FilenameUtil.extractDate(this.listingProductFile.getName()) ;
         this.magasin = FilenameUtil.extractMagasinId(this.listingProductFile.getName()) ;
@@ -101,23 +103,27 @@ public class Stage1Reducer {
 
     }
 
-    public static void reduce(File file, int topN) {
+    public Map<String,Integer> reduce() {
         //Stage1Reducer st1 = new Stage1Reducer(new File("stage1", "listing_produit-2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.stage1")) ;
-        Stage1Reducer st1 = new Stage1Reducer(file, topN) ;
         try {
-            st1.buildMap();
-            st1.writeStage2File();
-            String [] result = st1.getTopN();
-            st1.writeSortedResultFile(result);
+            this.buildMap();
+            this.writeStage2File();
+            String [] result = this.getTopN();
+            this.writeSortedResultFile(result);
 
         } catch (IOException e) {
             System.out.println("IO Exception");
         }
+        return this.productQteMap ;
     }
 
 
     public static void main(String[] args) {
-        File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-0b0abf8c-5efc-464c-8cb4-bce873078508_20190302.stage1") ;
-        Stage1Reducer.reduce(inputFile,100);
+        File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-0b70efe8-7e44-4104-8b9d-ec5d2588812e_20190302.stage1") ;
+        long start = System.currentTimeMillis() ;
+        Stage1Reducer st1 = new Stage1Reducer(inputFile, 100) ;
+        st1.reduce();
+        long  end = System.currentTimeMillis() ;
+        System.out.println("Stage1Reducer execution time = " + String.valueOf(end-start) + "ms");
     }
 }
