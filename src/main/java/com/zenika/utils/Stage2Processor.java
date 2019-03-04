@@ -8,11 +8,12 @@ import java.util.*;
 public class Stage2Processor {
 
     private static String REFERENTIEL_PRODUIT = "reference_prod" ;
-    private static String REFERENTIEL_PRODUIT_DIR = "bastien_data" ;
+    private static String REFERENTIEL_PRODUIT_DIR = "data" ;
     private static String STAGE_3_SUBDIRECTORY = "stage3" ;
     private static String STAGE_2_SUBDIRECTORY = "stage2" ;
     private static String TOP_100_CA = "top_100_ca" ;
     private static String RESULT_SUBDIRECTORY = "result" ;
+    private static String CSV_SEPARATOR = "|" ;
 
 
     private String magasin ;
@@ -23,16 +24,19 @@ public class Stage2Processor {
     private File refPrixFile ;
 
     // On pourrait passer la map en arguement pour pas avoir à la recréer
-    public Stage2Processor(File file, int topN) {
-        this.setProductFile = file ;
+    public Stage2Processor(String magasin, String date, int topN) {
+        this.setProductFile = FileBuilder.createStage2File(magasin,date) ;
         this.productCAMap = new HashMap<>() ;
         this.date  = FilenameUtil.extractDate(this.setProductFile.getName()) ;
         this.magasin = FilenameUtil.extractMagasinId(this.setProductFile.getName()) ;
         this.topN = topN ;
-        this.refPrixFile = new File(REFERENTIEL_PRODUIT_DIR, REFERENTIEL_PRODUIT.concat("-").concat(magasin).concat("_").concat(date).concat(".data")) ;
+        this.refPrixFile = FileBuilder.createReferenceProdFile(magasin,date) ;
+        //new File(REFERENTIEL_PRODUIT_DIR, REFERENTIEL_PRODUIT.concat("-").concat(magasin).concat("_").concat(date).concat(".data")) ;
+        this.reBuildQteMap();
     }
 
     private void reBuildQteMap() {
+        long start =  System.currentTimeMillis();
         String product;
         Float qte;
         String[] currentLine;
@@ -49,9 +53,13 @@ public class Stage2Processor {
             String currentFunction = Thread.currentThread().getStackTrace()[1].getMethodName();
             System.out.println("IO EXCEPTION ; " + currentFunction );
         }
+        long end =  System.currentTimeMillis();
+        System.out.println("BuildMap from stage1 file took " + String.valueOf(end-start) + "ms");
+
     }
 
     private void buildCAMap() {
+        long start = System.currentTimeMillis();
         String product;
         Float unitPrice ;
         String[] currentLine;
@@ -79,35 +87,48 @@ public class Stage2Processor {
             String unknownPrice = it.next() ;
             this.productCAMap.remove(unknownPrice) ;
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Compute CA for all products took " + String.valueOf(end-start) + "ms");
     }
 
     private void writeStage3File() {
-
+        long start = System.currentTimeMillis();
         File stage3Directory = new File(STAGE_3_SUBDIRECTORY);
         if (!stage3Directory.exists()) {
             stage3Directory.mkdir();
         }
 
-        File outputFile = new File(STAGE_3_SUBDIRECTORY, "set_ca-".concat(magasin).concat("_").concat(this.date).concat(".stage3")) ;
+        File outputFile = FileBuilder.createStage3File(this.magasin,this.date) ;
+        System.out.println(outputFile.getAbsolutePath());
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             String outputLine = null;
             for (String k : this.productCAMap.keySet()) {
                 outputLine = k.concat("|").concat(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
                 bo.write(outputLine.getBytes());
+                //StringBuilder sb = new StringBuilder().append(k).append(CSV_SEPARATOR).append(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
+                //bo.write(sb.toString().getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch (IOException e) {
             System.out.println("IO EXCEPTION");
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Write stage3 file took " + String.valueOf(end-start) + "ms");
     }
 
     private String[] getTopN() {
+        long start = System.currentTimeMillis();
         MaxHeapProduct maxHeap = new MaxHeapProduct(this.productCAMap) ;
-        return maxHeap.extractTopN(this.topN) ;
+        String[] result = maxHeap.extractTopN(this.topN) ;
+        long end = System.currentTimeMillis();
+        System.out.println("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
+        return result ;
     }
 
     private void writeSortedResultFile(String[] result) {
-        String outputFile  = TOP_100_CA.concat("_").concat(this.magasin).concat("_").concat(this.date).concat(".data");
+        long start = System.currentTimeMillis();
+        File outputFile = FileBuilder.createCAMagasinFile(magasin,date,topN) ;
+        //String outputFile  = TOP_100_CA.concat("_").concat(this.magasin).concat("_").concat(this.date).concat(".data");
         String outputLine = null ;
 
         File resultDirectory = new File(RESULT_SUBDIRECTORY);
@@ -115,7 +136,7 @@ public class Stage2Processor {
             resultDirectory.mkdir();
         }
 
-        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(new File (RESULT_SUBDIRECTORY, outputFile)))) {
+        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
             for (int i = 0 ; i < result.length ; i++) {
                 outputLine = result[i].concat("|").concat(String.format("%.2f", this.productCAMap.get(result[i])));
                 bo.write(outputLine.getBytes());
@@ -125,20 +146,24 @@ public class Stage2Processor {
             String currentFunction = Thread.currentThread().getStackTrace()[1].getMethodName();
             System.out.println("IO EXCEPTION ; " + currentFunction );
         }
+        long end = System.currentTimeMillis();
+        System.out.println("Write top_N_ca file took " + String.valueOf(end-start)+ "ms");
     }
 
-    public static void process(File file, int topN) {
-        Stage2Processor st2 = new Stage2Processor(file, topN) ;
-        //A ajouter une condition si on la récupère du stage précédent
-        st2.reBuildQteMap();
-        st2.buildCAMap();
-        st2.writeStage3File();
-        String [] result = st2.getTopN();
-        st2.writeSortedResultFile(result);
+    public Map<String, Float> process() {
+        this.buildCAMap();
+        this.writeStage3File();
+        String [] result = this.getTopN();
+        this.writeSortedResultFile(result);
+        return this.productCAMap ;
     }
 
     public static void main(String[] args) {
-        File inputFile = new File(STAGE_2_SUBDIRECTORY, "set_produit-0b0abf8c-5efc-464c-8cb4-bce873078508_20190302.stage2") ;
-        Stage2Processor.process(inputFile,100);
+        File inputFile = new File(STAGE_2_SUBDIRECTORY, "set_produit-0b70efe8-7e44-4104-8b9d-ec5d2588812e_20190302.stage2") ;
+        long start =  System.currentTimeMillis();
+        //Stage2Processor st2 = new Stage2Processor(inputFile, 100) ;
+        //st2.process();
+        long end = System.currentTimeMillis();
+        System.out.println("Stage2Processor total time = " + String.valueOf(end-start) + "ms");
     }
 }
