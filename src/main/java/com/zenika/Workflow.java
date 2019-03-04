@@ -1,41 +1,16 @@
-package main.java.com.zenika;
+package com.zenika;
 
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
-import main.java.com.zenika.utils.*;
-
+import com.zenika.mappers.*;
+import com.zenika.utils.*;
+import com.zenika.reducers.*;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.*;
 
 
 public class Workflow {
 
     // static Logger logger = Logger.getLogger(PropertiesFileLog4jExample.class);
-
-    public String CURRENT_DIRECTORY = System.getProperty("user.dir") ;
-
-    private static String FILENAME_SEPARATOR = "_" ;
-    private static String DOT = "." ;
-    private static String HYPHEN = "-" ;
-    private static String TRANSACTIONS = "transactions" ;
-    private static String REFERENCE_PROD = "reference_prod" ;
-    private static String LISTING_PRODUIT = "listing_produit" ;
-    private static String SET_PRODUIT = "set_produit" ;
-    private static String SET_CA = "set_ca" ;
-    private static String DATA = "data" ;
-    private static String STAGE1 = "stage1" ;
-    private static String STAGE2 = "stage2" ;
-    private static String STAGE3 = "stage3" ;
-    private static String TOP = "top" ;
-    private static String GLOBAL = "GLOBAL" ;
-    private static String J7 = "J7" ;
-    private static String CA = "ca" ;
-    private static String VENTES = "ventes" ;
 
     public static Set<String>  computeStage1(File transactionFile) {
         System.out.println("Starting compute of Stage1 ");
@@ -67,7 +42,11 @@ public class Workflow {
     public static Map<String, Float> computeStage3(String magasinId, String dateString, int topN) {
         System.out.println("Starting compute of Stage3 ");
 
-        Stage2Processor processor = new Stage2Processor(magasinId, dateString, topN);
+        File stage3File = FileBuilder.createStage3File(magasinId,dateString);
+        File setProduitFile = FileBuilder.createStage2File(magasinId,dateString) ;
+        File refPrixFile = FileBuilder.createReferenceProdFile(magasinId,dateString) ;
+
+        CAMapper processor = new CAMapper(refPrixFile, setProduitFile, topN, stage3File, FileBuilder.createCAMagasinFile(magasinId,dateString,topN));
         Map<String, Float> productCAMap = processor.process();
         return productCAMap ;
     }
@@ -87,6 +66,7 @@ public class Workflow {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
         return productVenteGlobal7JMap;
     }
@@ -106,6 +86,7 @@ public class Workflow {
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
         return productCAGlobal7JMap;
     }
@@ -162,6 +143,7 @@ public class Workflow {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
 
     }
@@ -179,6 +161,7 @@ public class Workflow {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -191,9 +174,6 @@ public class Workflow {
          */
         String dateString = FilenameUtil.extractDate(transactionFile.getName());
         Set<String> magasinsIdInTransactionFile = Workflow.computeStage1(transactionFile) ;
-
-
-
 
         /*
         For each magasin present in transaction file for date D, compute VENTES and CA files
@@ -326,7 +306,7 @@ public class Workflow {
          *  TransactionFileMapper
          *  foreach magasinId
          *      Stage1Reducer
-         *      Stage2Processor
+         *      CAMapper
          *
          *
          *

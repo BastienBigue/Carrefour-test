@@ -1,52 +1,55 @@
-package main.java.com.zenika.utils;
+package com.zenika.mappers;
 
-import java.io.*;
+import com.zenika.config.CommonConfig;
+import com.zenika.utils.FileBuilder;
+import com.zenika.utils.FilenameUtil;
+
+import java.io.File;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class TransactionFileMapper {
 
-    private static String STAGE_1_SUBDIRECTORY = "stage1" ;
-    private static String DATA_BASTIEN_SUBDIRECTORY = "bastien_data" ;
-
     private File file ;
     private String date ;
-    // private DateFormat dateFormat ;
     private Map<String, BufferedOutputStream> streamMap ;
-
-    // Noms de fichiers : transactions_YYYYMMDD.data
-    // txId|datetime|magasin|produit|qte
 
     public TransactionFileMapper(File file) {
         this.file = file ;
         this.streamMap = new HashMap<>() ;
         this.date = FilenameUtil.extractDate(this.file.getName()) ;
-        // this.dateFormat = new SimpleDateFormat("yyyyMMdd") ;
     }
 
     public Set<String> processTransactionFile() {
 
-        File stage1Directory = new File(STAGE_1_SUBDIRECTORY) ;
+        File stage1Directory = new File(CommonConfig.STAGE_1_SUBDIRECTORY) ;
         if (!stage1Directory.exists()) {
-            stage1Directory.mkdir();
+            stage1Directory.mkdirs();
         }
+
+        String magasin;
+        String produit;
+        String[] currentLine;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             for (String line; (line = br.readLine()) != null; ) {
-                // Est-ce que je crée pas des objet String[] et String a chaque itération là ?
-                String[] currentLine = line.split("\\|") ;
-                String magasin = currentLine[2] ;
-                String produit = currentLine[3] ;
+                currentLine = line.split("\\|") ;
+                magasin = currentLine[2] ;
+                produit = currentLine[3] ;
                 String qte = currentLine[4] ;
                 BufferedOutputStream outputStream = this.streamMap.get(magasin) ;
                 if (outputStream == null) {
-                    File currFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-".concat(magasin).concat("_").concat(this.date).concat(".stage1")) ;
-                    currFile.createNewFile() ;
+                    File currFile = FileBuilder.createStage1File(magasin,date) ;
                     outputStream = new BufferedOutputStream(new FileOutputStream(currFile)) ;
                     this.streamMap.put(magasin, outputStream) ;
                 }
-                String outputLine = produit.concat("|").concat(qte) ;
+                String outputLine = produit.concat(CommonConfig.CSV_SEPARATOR).concat(qte) ;
                 outputStream.write(outputLine.getBytes());
                 outputStream.write(System.lineSeparator().getBytes());
             }
@@ -55,12 +58,13 @@ public class TransactionFileMapper {
                 currentBuff.close();
             }
         } catch (IOException e) {
-            System.out.println("IO Exception");
+            e.printStackTrace();
+            System.exit(1);
         }
         return this.streamMap.keySet();
     }
 
-    public static void main(String[] args) {
+  /*  public static void main(String[] args) {
         File transactionFile = new File(DATA_BASTIEN_SUBDIRECTORY,"transactions_20190302.data") ;
 
         TransactionFileMapper mapper = new TransactionFileMapper(transactionFile) ;
@@ -70,5 +74,5 @@ public class TransactionFileMapper {
                 long end = System.currentTimeMillis() ;
                 System.out.println("TransactionFile mapper = " + String.valueOf(end-start) + "ms");
         }
-    }
+    }*/
 }

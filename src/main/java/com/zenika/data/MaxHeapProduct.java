@@ -1,5 +1,4 @@
-package main.java.com.zenika;
-
+package com.zenika.data;
 
 import java.util.HashMap;
 import java.util.Map;

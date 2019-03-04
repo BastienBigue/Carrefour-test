@@ -1,30 +1,33 @@
-package main.java.com.zenika.utils;
+package com.zenika.utils;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
-
+import com.zenika.config.CommonConfig;
 import java.io.File;
-import java.nio.file.Files;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.TimeZone;
+import java.util.Set;
+import java.util.HashSet;
 
 public class FileBuilder {
 
-    private static final int SECONDS_PER_DAY = 86400 ;
 
+    /*
+    Example data files
+     */
     public static File createReferenceProdFile(String magasin, String date) {
         return new File(FilenameUtil.DATA, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.REF_PROD)) ;
     }
 
-    /*
-    FULL FILES, NOT SORTED
-     */
+    public static File createTransactionFile(String date) {
+        return new File(FilenameUtil.DATA, FilenameUtil.buildFileName(null,date,FilenameUtil.FileType.TRANSACTION_FILE));
+    }
 
+
+    /*
+    Intermediary stages files
+     */
     public static File createStage1File(String magasin, String date) {
         return new File(FilenameUtil.STAGE1, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE1)) ;
     }
@@ -61,10 +64,52 @@ public class FileBuilder {
         return new File(FilenameUtil.STAGE5_2, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_2)) ;
     }
 
-    /*
-    RESULTS FILES
-     */
+    private static Set<File> createStageNLast7DaysFiles(String magasinsId, String dateString, FilenameUtil.FileType fileType) throws Exception {
 
+        Set<File> lastSevenDays = new HashSet<>() ;
+        DateFormat dateFormat = new SimpleDateFormat(CommonConfig.DATE_FORMAT);
+        dateFormat.setTimeZone(TimeZone.getTimeZone(CommonConfig.TIMEZONE));
+        Date date = dateFormat.parse(dateString) ;
+        Instant instant = date.toInstant();
+
+        for (int i=0 ; i<7 ; i++) {
+            String priorDate = dateFormat.format(Date.from(instant.minusSeconds(CommonConfig.SECONDS_PER_DAY *i)));
+            File file ;
+            if (fileType == FilenameUtil.FileType.STAGE2) {
+                file = FileBuilder.createStage2File(magasinsId,priorDate);
+            } else if (fileType == FilenameUtil.FileType.STAGE3) {
+                file = FileBuilder.createStage3File(magasinsId,priorDate);
+            } else if (fileType == FilenameUtil.FileType.STAGE4_1) {
+                file = FileBuilder.createStage4_1File(priorDate);
+            } else if (fileType == FilenameUtil.FileType.STAGE4_2) {
+                file = FileBuilder.createStage4_2File(priorDate);
+            } else {
+                throw new Exception("Error in createStageNLast7DaysFiles, unknown FilenameUtil.FileType provided") ;
+            }
+            lastSevenDays.add(file);
+        }
+        return lastSevenDays;
+    }
+
+    public static Set<File> createStage2Last7DaysFiles(String magasinsId, String dateString) throws Exception {
+        return FileBuilder.createStageNLast7DaysFiles(magasinsId,dateString, FilenameUtil.FileType.STAGE2);
+    }
+
+    public static Set<File> createStage3Last7DaysFiles(String magasinsId, String dateString) throws Exception {
+        return FileBuilder.createStageNLast7DaysFiles(magasinsId,dateString, FilenameUtil.FileType.STAGE3);
+    }
+
+    public static Set<File> createStage4_1Last7DaysFiles(String dateString) throws Exception {
+        return FileBuilder.createStageNLast7DaysFiles(null,dateString, FilenameUtil.FileType.STAGE4_1);
+    }
+
+    public static Set<File> createStage4_2Last7DaysFiles(String dateString) throws Exception {
+        return FileBuilder.createStageNLast7DaysFiles(null,dateString, FilenameUtil.FileType.STAGE4_2);
+    }
+
+    /*
+    Results files
+     */
     public static File createVenteMagasinFile(String magasin, String date, int topN) {
         return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_VENTES_MAGASIN, topN)) ;
     }
@@ -97,47 +142,6 @@ public class FileBuilder {
         return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL_7J, topN)) ;
     }
 
-    private static Set<File> createStageNLast7DaysFiles(String magasinsId, String dateString, FilenameUtil.FileType fileType) throws Exception {
 
-        Set<File> lastSevenDays = new HashSet<>() ;
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Paris"));
-        Date date = dateFormat.parse(dateString) ;
-        Instant instant = date.toInstant();
-
-        for (int i=0 ; i<7 ; i++) {
-            String priorDate = dateFormat.format(Date.from(instant.minusSeconds(SECONDS_PER_DAY*i)));
-            File file ;
-            if (fileType == FilenameUtil.FileType.STAGE2) {
-                file = FileBuilder.createStage2File(magasinsId,priorDate);
-            } else if (fileType == FilenameUtil.FileType.STAGE3) {
-                file = FileBuilder.createStage3File(magasinsId,priorDate);
-            } else if (fileType == FilenameUtil.FileType.STAGE4_1) {
-                file = FileBuilder.createStage4_1File(priorDate);
-            } else if (fileType == FilenameUtil.FileType.STAGE4_2) {
-                file = FileBuilder.createStage4_2File(priorDate);
-            } else {
-                throw new Exception() ;
-            }
-            lastSevenDays.add(file);
-        }
-        return lastSevenDays;
-    }
-
-    public static Set<File> createStage2Last7DaysFiles(String magasinsId, String dateString) throws Exception {
-        return FileBuilder.createStageNLast7DaysFiles(magasinsId,dateString, FilenameUtil.FileType.STAGE2);
-    }
-
-    public static Set<File> createStage3Last7DaysFiles(String magasinsId, String dateString) throws Exception {
-        return FileBuilder.createStageNLast7DaysFiles(magasinsId,dateString, FilenameUtil.FileType.STAGE3);
-    }
-
-    public static Set<File> createStage4_1Last7DaysFiles(String dateString) throws Exception {
-        return FileBuilder.createStageNLast7DaysFiles(null,dateString, FilenameUtil.FileType.STAGE4_1);
-    }
-
-    public static Set<File> createStage4_2Last7DaysFiles(String dateString) throws Exception {
-        return FileBuilder.createStageNLast7DaysFiles(null,dateString, FilenameUtil.FileType.STAGE4_2);
-    }
 
 }

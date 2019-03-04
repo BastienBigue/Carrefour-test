@@ -1,22 +1,24 @@
-package main.java.com.zenika.utils;
+package com.zenika.reducers;
 
-import main.java.com.zenika.MaxHeapProduct;
-import sun.applet.resources.MsgAppletViewer;
-
-import java.io.*;
+import com.zenika.config.CommonConfig;
+import com.zenika.data.MaxHeapProduct;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
-public class QteReducer {
+public class CAReducer {
 
     private Set<File> filesToAggregate ;
-    private Map<String, Integer> productMap ;
+    private Map<String, Float> productMap ;
     private int topN ;
     private File outputFullFile ;
     private File outputTopNSortedFile ;
 
-    public QteReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
+    public CAReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
         this.topN = topN ;
         this.outputFullFile = outputFullFile ;
         this.outputTopNSortedFile = outputTopNSortedFile ;
@@ -27,17 +29,16 @@ public class QteReducer {
     private void buildMap() throws IOException {
 
         String product;
-        Integer qte;
+        Float ca;
         String[] currentLine;
-        for (Iterator<File> itFile = filesToAggregate.iterator(); itFile.hasNext();) {
-            File currFile = itFile.next();
+
+        for (File currFile : filesToAggregate) {
             try (BufferedReader br = new BufferedReader(new FileReader(currFile))) {
                 for (String line; (line = br.readLine()) != null; ) {
-                    // Pas besoin de précompiler la regexp : ce n'est pas une regexp qui est utilisée car le pattern ne contient qu'un seul caractère.
                     currentLine = line.split("\\|");
                     product = currentLine[0];
-                    qte = Integer.valueOf(currentLine[1]);
-                    this.productMap.put(product, this.productMap.getOrDefault(product, 0) + qte);
+                    ca =  Float.valueOf(currentLine[1]);
+                    this.productMap.put(product, this.productMap.getOrDefault(product, 0f) + ca);
                 }
             }
         }
@@ -47,18 +48,19 @@ public class QteReducer {
 
         File stage2Directory = new File(outputFullFile.getParent());
         if (!stage2Directory.exists()) {
-            stage2Directory.mkdir();
+            stage2Directory.mkdirs();
         }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
-            String outputLine = null;
+            String outputLine ;
             for (String k : this.productMap.keySet()) {
-                outputLine = k.concat("|").concat(this.productMap.get(k).toString());
+                outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(String.format(Locale.US, "%.2f", this.productMap.get(k)));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch (IOException e) {
-            System.out.println("IO EXCEPTION");
+            e.printStackTrace();
+            System.exit(1);
         }
     }
 
@@ -71,26 +73,27 @@ public class QteReducer {
 
     private void writeSortedResultFile(String[] result) {
 
-        String outputLine = null ;
+        String outputLine ;
 
         File resultDirectory = new File(outputTopNSortedFile.getParent());
         if (!resultDirectory.exists()) {
-            resultDirectory.mkdir();
+            resultDirectory.mkdirs();
         }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat("|").concat(this.productMap.get(result[i]).toString());
+                outputLine = result[i].concat(CommonConfig.CSV_SEPARATOR).concat(String.format(Locale.US, "%.2f", this.productMap.get(result[i])));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch (IOException e) {
-            System.out.println("IO EXCEPTION");
+            e.printStackTrace();
+            System.exit(1);
         }
 
     }
 
-    public Map<String,Integer> reduce() {
+    public Map<String,Float> reduce() {
         try {
             this.buildMap();
             this.writeFullFile();
@@ -98,7 +101,8 @@ public class QteReducer {
             this.writeSortedResultFile(result);
 
         } catch (IOException e) {
-            System.out.println("IO Exception");
+            e.printStackTrace();
+            System.exit(1);
         }
         return this.productMap ;
     }
@@ -120,11 +124,11 @@ public class QteReducer {
         filesToCompute.add(new File("stage2","set_produit-dd43720c-be43-41b6-bc4a-ac4beabd0d9b_20170514.stage2"));
         filesToCompute.add(new File("stage2","set_produit-e3d54d00-18be-45e1-b648-41147638bafe_20170514.stage2"));
 
-        File outputFullFile = new File(FilenameUtil.STAGE4_1, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.STAGE4_1)) ;
-        File outputTopNSortedFile = new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.RESULT_VENTES_GLOBAL, 100)) ;
-        QteReducer qteReducer = new QteReducer(filesToCompute,100, outputFullFile, outputTopNSortedFile) ;
+        //File outputFullFile = new File(FilenameUtil.STAGE4_1, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.STAGE4_1)) ;
+        //File outputTopNSortedFile = new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.RESULT_VENTES_GLOBAL, 100)) ;
+        //QteReducer qteReducer = new QteReducer(filesToCompute,100, outputFullFile, outputTopNSortedFile) ;
 
-        qteReducer.reduce();
+        //qteReducer.reduce();
 
         /*File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-0b70efe8-7e44-4104-8b9d-ec5d2588812e_20190302.stage1") ;
         long start = System.currentTimeMillis() ;

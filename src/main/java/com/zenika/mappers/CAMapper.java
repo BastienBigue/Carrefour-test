@@ -1,36 +1,37 @@
-package main.java.com.zenika.utils;
+package com.zenika.mappers;
 
-import main.java.com.zenika.MaxHeapProduct;
+import com.zenika.config.CommonConfig;
+import com.zenika.data.MaxHeapProduct;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
 
-public class Stage2Processor {
+public class CAMapper {
 
-    private static String REFERENTIEL_PRODUIT = "reference_prod" ;
-    private static String REFERENTIEL_PRODUIT_DIR = "data" ;
-    private static String STAGE_3_SUBDIRECTORY = "stage3" ;
-    private static String STAGE_2_SUBDIRECTORY = "stage2" ;
-    private static String TOP_100_CA = "top_100_ca" ;
-    private static String RESULT_SUBDIRECTORY = "result" ;
-    private static String CSV_SEPARATOR = "|" ;
-
-
-    private String magasin ;
-    private String date ;
     private Map<String, Float> productCAMap ;
     private File setProductFile ;
     private int topN ;
     private File refPrixFile ;
+    private File outputFullFile ;
+    private File outputTopNSortedFile ;
 
     // On pourrait passer la map en arguement pour pas avoir à la recréer
-    public Stage2Processor(String magasin, String date, int topN) {
-        this.setProductFile = FileBuilder.createStage2File(magasin,date) ;
-        this.productCAMap = new HashMap<>() ;
-        this.date  = FilenameUtil.extractDate(this.setProductFile.getName()) ;
-        this.magasin = FilenameUtil.extractMagasinId(this.setProductFile.getName()) ;
+    public CAMapper(File refPrixFile, File setProductFile, int topN, File outputFullFile, File outputTopNSortedFile) {
+        this.outputFullFile = outputFullFile;
+        this.outputTopNSortedFile = outputTopNSortedFile;
+        this.setProductFile = setProductFile;
+        this.refPrixFile = refPrixFile;
         this.topN = topN ;
-        this.refPrixFile = FileBuilder.createReferenceProdFile(magasin,date) ;
+        this.productCAMap = new HashMap<>() ;
         this.reBuildQteMap();
     }
 
@@ -42,15 +43,14 @@ public class Stage2Processor {
 
         try (BufferedReader br = new BufferedReader(new FileReader(setProductFile))) {
             for (String line; (line = br.readLine()) != null; ) {
-                // Pas besoin de précompiler la regexp : ce n'est pas une regexp qui est utilisée car le pattern ne contient qu'un seul caractère.
                 currentLine = line.split("\\|");
                 product = currentLine[0];
                 qte = Float.valueOf(currentLine[1]);
-                this.productCAMap.put(product, this.productCAMap.getOrDefault(product, new Float(0.0)) + qte);
+                this.productCAMap.put(product, this.productCAMap.getOrDefault(product, 0f) + qte);
             }
         } catch (IOException e) {
-            String currentFunction = Thread.currentThread().getStackTrace()[1].getMethodName();
-            System.out.println("IO EXCEPTION ; " + currentFunction );
+            e.printStackTrace();
+            System.exit(1);
         }
         long end =  System.currentTimeMillis();
         //DEBUG System.out.println("BuildMap from stage1 file took " + String.valueOf(end-start) + "ms");
@@ -78,11 +78,11 @@ public class Stage2Processor {
                 }
             }
         }  catch (IOException e) {
-            String currentFunction = Thread.currentThread().getStackTrace()[1].getMethodName();
-            System.out.println("IO EXCEPTION ; " + currentFunction );
+            e.printStackTrace();
+            System.exit(1);
         }
 
-        for(Iterator<String> it = productToRemove.iterator() ; it.hasNext();) {
+        for(Iterator<String> it = productToRemove.iterator(); it.hasNext();) {
             String unknownPrice = it.next() ;
             this.productCAMap.remove(unknownPrice) ;
         }
@@ -92,23 +92,23 @@ public class Stage2Processor {
 
     private void writeStage3File() {
         long start = System.currentTimeMillis();
-        File stage3Directory = new File(STAGE_3_SUBDIRECTORY);
+        File stage3Directory = new File(outputFullFile.getParent());
         if (!stage3Directory.exists()) {
-            stage3Directory.mkdir();
+            stage3Directory.mkdirs();
         }
 
-        File outputFile = FileBuilder.createStage3File(this.magasin,this.date) ;
-        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
-            String outputLine = null;
+        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
+            String outputLine ;
             for (String k : this.productCAMap.keySet()) {
-                outputLine = k.concat("|").concat(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
+                outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
                 bo.write(outputLine.getBytes());
                 //StringBuilder sb = new StringBuilder().append(k).append(CSV_SEPARATOR).append(String.format (Locale.US, "%.2f", this.productCAMap.get(k)));
                 //bo.write(sb.toString().getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch (IOException e) {
-            System.out.println("IO EXCEPTION");
+            e.printStackTrace();
+            System.exit(1);
         }
         long end = System.currentTimeMillis();
         //DEBUG System.out.println("Write stage3 file took " + String.valueOf(end-start) + "ms");
@@ -125,24 +125,22 @@ public class Stage2Processor {
 
     private void writeSortedResultFile(String[] result) {
         long start = System.currentTimeMillis();
-        File outputFile = FileBuilder.createCAMagasinFile(magasin,date,topN) ;
-        //String outputFile  = TOP_100_CA.concat("_").concat(this.magasin).concat("_").concat(this.date).concat(".data");
-        String outputLine = null ;
+        String outputLine ;
 
-        File resultDirectory = new File(RESULT_SUBDIRECTORY);
+        File resultDirectory = new File(this.outputTopNSortedFile.getParent());
         if (!resultDirectory.exists()) {
-            resultDirectory.mkdir();
+            resultDirectory.mkdirs();
         }
 
-        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFile))) {
+        try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(this.outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat("|").concat(String.format(Locale.US, "%.2f", this.productCAMap.get(result[i])));
+                outputLine = result[i].concat(CommonConfig.CSV_SEPARATOR).concat(String.format(Locale.US, "%.2f", this.productCAMap.get(result[i])));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch (IOException e) {
-            String currentFunction = Thread.currentThread().getStackTrace()[1].getMethodName();
-            System.out.println("IO EXCEPTION ; " + currentFunction );
+            e.printStackTrace();
+            System.exit(1);
         }
         long end = System.currentTimeMillis();
         //DEBUG System.out.println("Write top_N_ca file took " + String.valueOf(end-start)+ "ms");
@@ -156,12 +154,12 @@ public class Stage2Processor {
         return this.productCAMap ;
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         File inputFile = new File(STAGE_2_SUBDIRECTORY, "set_produit-0b70efe8-7e44-4104-8b9d-ec5d2588812e_20190302.stage2") ;
         long start =  System.currentTimeMillis();
-        //Stage2Processor st2 = new Stage2Processor(inputFile, 100) ;
+        //CAMapper st2 = new CAMapper(inputFile, 100) ;
         //st2.process();
         long end = System.currentTimeMillis();
-        System.out.println("Stage2Processor total time = " + String.valueOf(end-start) + "ms");
-    }
+        System.out.println("CAMapper total time = " + String.valueOf(end-start) + "ms");
+    }*/
 }
