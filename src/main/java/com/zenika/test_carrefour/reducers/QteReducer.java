@@ -60,10 +60,6 @@ public class QteReducer {
 
     private void writeFullFile() {
         long start = System.currentTimeMillis();
-        File stage2Directory = new File(outputFullFile.getParent());
-        if (!stage2Directory.exists()) {
-            stage2Directory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
             String outputLine = null;
@@ -99,11 +95,6 @@ public class QteReducer {
     private void writeSortedResultFile(String[] result) {
         long start = System.currentTimeMillis();
         String outputLine = null ;
-
-        File resultDirectory = new File(outputTopNSortedFile.getParent());
-        if (!resultDirectory.exists()) {
-            resultDirectory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {

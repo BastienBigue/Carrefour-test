@@ -2,7 +2,6 @@ package com.zenika.test_carrefour.reducers;
 
 import com.zenika.test_carrefour.config.CommonConfig;
 import com.zenika.test_carrefour.data.MaxHeapProduct;
-import com.zenika.test_carrefour.mappers.TransactionFileMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -57,10 +56,6 @@ public class CAReducer {
 
     private void writeFullFile() {
         long start = System.currentTimeMillis();
-        File stage2Directory = new File(outputFullFile.getParent());
-        if (!stage2Directory.exists()) {
-            stage2Directory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
             String outputLine ;
@@ -96,11 +91,6 @@ public class CAReducer {
     private void writeSortedResultFile(String[] result) {
         long start = System.currentTimeMillis();
         String outputLine ;
-
-        File resultDirectory = new File(outputTopNSortedFile.getParent());
-        if (!resultDirectory.exists()) {
-            resultDirectory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {

@@ -99,10 +99,6 @@ public class CAMapper {
 
     private void writeStage3File() {
         long start = System.currentTimeMillis();
-        File stage3Directory = new File(outputFullFile.getParent());
-        if (!stage3Directory.exists()) {
-            stage3Directory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
             String outputLine ;
@@ -136,11 +132,6 @@ public class CAMapper {
     private void writeSortedResultFile(String[] result) {
         long start = System.currentTimeMillis();
         String outputLine ;
-
-        File resultDirectory = new File(this.outputTopNSortedFile.getParent());
-        if (!resultDirectory.exists()) {
-            resultDirectory.mkdirs();
-        }
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(this.outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {

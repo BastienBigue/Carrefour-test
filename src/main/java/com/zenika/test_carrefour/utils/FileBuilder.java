@@ -18,11 +18,19 @@ public class FileBuilder {
     Example data files
      */
     public static File createReferenceProdFile(String magasin, String date) {
-        return new File(FilenameUtil.DATA, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.REF_PROD)) ;
+        File parent = new File(FilenameUtil.DATA) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.REF_PROD)) ;
     }
 
     public static File createTransactionFile(String date) {
-        return new File(FilenameUtil.DATA, FilenameUtil.buildFileName(null,date,FilenameUtil.FileType.TRANSACTION_FILE));
+        File parent = new File(FilenameUtil.DATA) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date,FilenameUtil.FileType.TRANSACTION_FILE));
     }
 
 
@@ -30,39 +38,75 @@ public class FileBuilder {
     Intermediary stages files
      */
     public static File createStage1File(String magasin, String date) {
-        return new File(FilenameUtil.STAGE1, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE1)) ;
+        File parent = new File(FilenameUtil.STAGE1) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE1)) ;
     }
 
     public static File createStage2File(String magasin, String date) {
-        return new File(FilenameUtil.STAGE2, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE2)) ;
+        File parent = new File(FilenameUtil.STAGE2) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE2)) ;
     }
 
     public static File createStage3File(String magasin, String date) {
-        return new File(FilenameUtil.STAGE3, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE3)) ;
+        File parent = new File(FilenameUtil.STAGE3) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE3)) ;
     }
 
     public static File createStage4_1File(String date) {
-        return new File(FilenameUtil.STAGE4_1, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE4_1)) ;
+        File parent = new File(FilenameUtil.STAGE4_1) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE4_1)) ;
     }
 
     public static File createStage4_2File(String date) {
-        return new File(FilenameUtil.STAGE4_2, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE4_2)) ;
+        File parent = new File(FilenameUtil.STAGE4_2) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE4_2)) ;
     }
 
     public static File createStage4_3File(String magasin, String date) {
-        return new File(FilenameUtil.STAGE4_3, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE4_3)) ;
+        File parent = new File(FilenameUtil.STAGE4_3) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE4_3)) ;
     }
 
     public static File createStage4_4File(String magasin, String date) {
-        return new File(FilenameUtil.STAGE4_4, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE4_4)) ;
+        File parent = new File(FilenameUtil.STAGE4_4) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.STAGE4_4)) ;
     }
 
     public static File createStage5_1File(String date) {
-        return new File(FilenameUtil.STAGE5_1, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_1)) ;
+        File parent = new File(FilenameUtil.STAGE5_1) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_1)) ;
     }
 
     public static File createStage5_2File(String date) {
-        return new File(FilenameUtil.STAGE5_2, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_2)) ;
+        File parent = new File(FilenameUtil.STAGE5_2) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_2)) ;
     }
 
     private static Set<File> createStageNLast7DaysFiles(String magasinsId, String dateString, FilenameUtil.FileType fileType) throws Exception {
@@ -112,35 +156,67 @@ public class FileBuilder {
     Results files
      */
     public static File createVenteMagasinFile(String magasin, String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_VENTES_MAGASIN, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_VENTES_MAGASIN, topN)) ;
     }
 
     public static File createCAMagasinFile(String magasin, String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_CA_MAGASIN, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_CA_MAGASIN, topN)) ;
     }
 
     public static File createVenteGlobalFile(String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_VENTES_GLOBAL, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_VENTES_GLOBAL, topN)) ;
     }
 
     public static File createCAGlobalFile(String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL, topN)) ;
     }
 
     public static File createVenteMagasin7JFile(String magasin, String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_VENTES_MAGASIN_7J, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_VENTES_MAGASIN_7J, topN)) ;
     }
 
     public static File createCAMagasin7JFile(String magasin, String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_CA_MAGASIN_7J, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(magasin,date, FilenameUtil.FileType.RESULT_CA_MAGASIN_7J, topN)) ;
     }
 
     public static File createVenteGlobal7JFile(String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_VENTES_GLOBAL_7J, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_VENTES_GLOBAL_7J, topN)) ;
     }
 
     public static File createCAGlobal7JFile(String date, int topN) {
-        return new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL_7J, topN)) ;
+        File parent = new File(FilenameUtil.RESULT) ;
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
+        return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL_7J, topN)) ;
     }
 
 

@@ -29,11 +29,6 @@ public class TransactionFileMapper {
 
     public Set<String> processTransactionFile() {
 
-        File stage1Directory = new File(CommonConfig.STAGE_1_SUBDIRECTORY) ;
-        if (!stage1Directory.exists()) {
-            stage1Directory.mkdirs();
-        }
-
         String magasin;
         String produit;
         String[] currentLine;
