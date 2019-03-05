@@ -11,41 +11,38 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
-public class QteReducer {
+public abstract class Reducer<T> {
 
-    static Logger log = LogManager.getLogger(QteReducer.class);
+    static Logger log = LogManager.getLogger(Reducer.class);
 
     private Set<File> filesToAggregate ;
-    private Map<String, Integer> productMap ;
+    protected Map<String, T> productMap ;
     private int topN ;
     private File outputFullFile ;
     private File outputTopNSortedFile ;
 
-    public QteReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
+    public Reducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
         this.topN = topN ;
         this.outputFullFile = outputFullFile ;
         this.outputTopNSortedFile = outputTopNSortedFile ;
         this.filesToAggregate = filesToAggregate;
-        this.productMap = new HashMap<>() ;
+        this.productMap = new HashMap<>(131072) ;
     }
+
+    public abstract void parseAndInsertInMap(String[] value);
 
     private void buildMap() {
         long start = System.currentTimeMillis();
-
-        String product;
-        Integer qte;
         String[] currentLine;
 
         for (File currFile : filesToAggregate) {
             try (BufferedReader br = new BufferedReader(new FileReader(currFile))) {
                 for (String line; (line = br.readLine()) != null; ) {
                     currentLine = line.split("\\|");
-                    product = currentLine[0];
-                    qte = Integer.valueOf(currentLine[1]);
-                    this.productMap.put(product, this.productMap.getOrDefault(product, 0) + qte);
+                    parseAndInsertInMap(currentLine);
                 }
             } catch(FileNotFoundException f) {
-                log.error("QteReducer could not find file : " + currFile.getName() + "-- Exit");
+                log.error("Reducer could not find file : " + currFile.getName() + "-- Exit");
                 f.printStackTrace();
                 System.exit(1);
             } catch (IOException e) {
@@ -69,7 +66,7 @@ public class QteReducer {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("QteReducer could not find file : " + outputFullFile.getName() + "-- Exit");
+            log.error("Reducer could not find file : " + outputFullFile.getName() + "-- Exit");
             f.printStackTrace();
             System.exit(1);
         } catch (IOException e) {
@@ -103,7 +100,7 @@ public class QteReducer {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("QteReducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit");
+            log.error("Reducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit");
             f.printStackTrace();
             System.exit(1);
         } catch (IOException e) {
@@ -116,7 +113,7 @@ public class QteReducer {
 
     }
 
-    public Map<String,Integer> reduce() {
+    public Map<String,T> reduce() {
         this.buildMap();
         this.writeFullFile();
         String [] result = this.getTopN();
@@ -145,13 +142,13 @@ public class QteReducer {
 
         //File outputFullFile = new File(FilenameUtil.STAGE4_1, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.STAGE4_1)) ;
         //File outputTopNSortedFile = new File(FilenameUtil.RESULT, FilenameUtil.buildFileName(null, "20170514", FilenameUtil.FileType.RESULT_VENTES_GLOBAL, 100)) ;
-        //QteReducer qteReducer = new QteReducer(filesToCompute,100, outputFullFile, outputTopNSortedFile) ;
+        //Reducer qteReducer = new Reducer(filesToCompute,100, outputFullFile, outputTopNSortedFile) ;
 
         //qteReducer.reduce();
 
         /*File inputFile = new File(STAGE_1_SUBDIRECTORY, "listing_produit-0b70efe8-7e44-4104-8b9d-ec5d2588812e_20190302.stage1") ;
         long start = System.currentTimeMillis() ;
-        QteReducer qte = new Stage1Reducer(inputFile, 100) ;
+        Reducer qte = new Stage1Reducer(inputFile, 100) ;
         st1.reduce();
         long  end = System.currentTimeMillis() ;
         System.out.println("Stage1Reducer execution time = " + String.valueOf(end-start) + "ms");*/

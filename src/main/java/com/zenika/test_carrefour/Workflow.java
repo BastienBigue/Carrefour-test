@@ -2,15 +2,15 @@ package com.zenika.test_carrefour;
 
 import com.zenika.test_carrefour.mappers.CAMapper;
 import com.zenika.test_carrefour.mappers.TransactionFileMapper;
-import com.zenika.test_carrefour.reducers.CAReducer;
-import com.zenika.test_carrefour.reducers.QteReducer;
+import com.zenika.test_carrefour.reducers.FloatReducer;
+import com.zenika.test_carrefour.reducers.IntegerReducer;
+import com.zenika.test_carrefour.reducers.Reducer;
 import com.zenika.test_carrefour.utils.FileBuilder;
 import com.zenika.test_carrefour.utils.FilenameUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 
@@ -40,7 +40,7 @@ public class Workflow {
         stage1FileSet.add(stage1File) ;
 
         File stage2File = FileBuilder.createStage2File(magasinId, dateString);
-        QteReducer reducerQtePerMagasin = new QteReducer(stage1FileSet, topN,
+        Reducer reducerQtePerMagasin = new IntegerReducer(stage1FileSet, topN,
                 stage2File,
                 FileBuilder.createVenteMagasinFile(magasinId, dateString, topN));
         Map<String, Integer> productQteMap = reducerQtePerMagasin.reduce();
@@ -84,7 +84,7 @@ public class Workflow {
         }
 
         if (Workflow.allFilesExist(stage2Last7DaysFiles)) {
-            QteReducer reducerQteFor7J = new QteReducer(stage2Last7DaysFiles, topN, stage4_3File, FileBuilder.createVenteMagasin7JFile(magasinId, dateString, topN));
+            Reducer reducerQteFor7J = new IntegerReducer(stage2Last7DaysFiles, topN, stage4_3File, FileBuilder.createVenteMagasin7JFile(magasinId, dateString, topN));
             productVenteGlobal7JMap = reducerQteFor7J.reduce();
 
             long end = System.currentTimeMillis();
@@ -112,7 +112,7 @@ public class Workflow {
         }
 
         if (Workflow.allFilesExist(stage3Last7DaysFiles)) {
-            CAReducer reducerCAFor7J = new CAReducer(stage3Last7DaysFiles, topN, stage4_4File, FileBuilder.createCAMagasin7JFile(magasinId, dateString, topN));
+            FloatReducer reducerCAFor7J = new FloatReducer(stage3Last7DaysFiles, topN, stage4_4File, FileBuilder.createCAMagasin7JFile(magasinId, dateString, topN));
             productCAGlobal7JMap = reducerCAFor7J.reduce();
             long end = System.currentTimeMillis();
             log.info("Compute of Stage4_4 done");
@@ -127,7 +127,7 @@ public class Workflow {
         log.info("Starting compute of Stage4_1 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
-        Set<File> allMagasinsVenteFiles = new HashSet<>();
+        Set<File> allMagasinsVenteFiles = new HashSet<>(2048);
         Map<String, Integer> productVenteGlobal = null ;
         for (Iterator<String> it = magasinsIdToGlobal.iterator(); it.hasNext(); ) {
             String magasin = it.next();
@@ -136,7 +136,7 @@ public class Workflow {
 
         if (allFilesExist(allMagasinsVenteFiles)) {
             File stage4_1File = FileBuilder.createStage4_1File(dateString);
-            QteReducer reducerVenteGlobal = new QteReducer(allMagasinsVenteFiles, topN, stage4_1File, FileBuilder.createVenteGlobalFile(dateString, topN));
+            Reducer reducerVenteGlobal = new IntegerReducer(allMagasinsVenteFiles, topN, stage4_1File, FileBuilder.createVenteGlobalFile(dateString, topN));
             productVenteGlobal = reducerVenteGlobal.reduce();
             long end = System.currentTimeMillis();
             log.info("Compute of Stage4_1 done");
@@ -151,7 +151,7 @@ public class Workflow {
         log.info("Starting compute of Stage4_2 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
-        Set<File> allMagasinsCAFiles = new HashSet<>() ;
+        Set<File> allMagasinsCAFiles = new HashSet<>(2048) ;
         Map<String, Float> productCAGlobal = null ;
 
         for (Iterator<String> it = magasinsIdToGlobal.iterator(); it.hasNext(); ) {
@@ -161,7 +161,7 @@ public class Workflow {
 
         if (allFilesExist(allMagasinsCAFiles)) {
             File stage4_2File = FileBuilder.createStage4_2File(dateString);
-            CAReducer reducerCAGlobal = new CAReducer(allMagasinsCAFiles, topN, stage4_2File, FileBuilder.createCAGlobalFile(dateString, topN));
+            FloatReducer reducerCAGlobal = new FloatReducer(allMagasinsCAFiles, topN, stage4_2File, FileBuilder.createCAGlobalFile(dateString, topN));
             productCAGlobal = reducerCAGlobal.reduce();
             long end = System.currentTimeMillis();
             log.info("Compute of Stage4_2 done");
@@ -187,7 +187,7 @@ public class Workflow {
         }
 
         if (Workflow.allFilesExist(stage4_1Last7DaysFiles)) {
-            QteReducer reducerQteGlobalFor7J = new QteReducer(stage4_1Last7DaysFiles, topN, stage5_1File, FileBuilder.createVenteGlobal7JFile(dateString, topN));
+            Reducer reducerQteGlobalFor7J = new IntegerReducer(stage4_1Last7DaysFiles, topN, stage5_1File, FileBuilder.createVenteGlobal7JFile(dateString, topN));
             reducerQteGlobalFor7J.reduce();
             long end = System.currentTimeMillis();
             log.info("Compute of Stage5_1 done");
@@ -214,7 +214,7 @@ public class Workflow {
         }
 
         if (Workflow.allFilesExist(stage4_2Last7DaysFiles)) {
-            CAReducer reducerCAGlobalFor7J = new CAReducer(stage4_2Last7DaysFiles, topN, stage5_2File, FileBuilder.createCAGlobal7JFile(dateString, topN));
+            FloatReducer reducerCAGlobalFor7J = new FloatReducer(stage4_2Last7DaysFiles, topN, stage5_2File, FileBuilder.createCAGlobal7JFile(dateString, topN));
             reducerCAGlobalFor7J.reduce();
             long end = System.currentTimeMillis();
             log.info("Compute of Stage5_2 done");
@@ -261,31 +261,27 @@ public class Workflow {
 
     }
 
-    public static void main(String[] args) throws IOException {
-        /*String log4jConfigFile = System.getProperty("user.dir")
-                + File.separator + "log4j2.xml";
-        PropertyConfigurator.configure(log4jConfigFile);
-        logger.debug("this is a debug log message");
-        logger.info("this is a information log message");
-        logger.warn("this is a warning log message");*/
-
-        File transactionFile1 = new File("data","transactions_20170508.data") ;
-        File transactionFile2 = new File("data","transactions_20170509.data") ;
-        File transactionFile3 = new File("data","transactions_20170510.data") ;
-        File transactionFile4 = new File("data","transactions_20170511.data") ;
-        File transactionFile5 = new File("data","transactions_20170512.data") ;
-        File transactionFile6 = new File("data","transactions_20170513.data") ;
-        File transactionFile7 = new File("data","transactions_20170514.data") ;
+    public static void main(String[] args) {
+        //File transactionFile1 = new File("data","transactions_20170514.data") ;
+        File transactionFile2 = new File("data","transactions_20190305.data") ;
+        File transactionFile3 = new File("data","transactions_20190306.data") ;
+        File transactionFile4 = new File("data","transactions_20190307.data") ;
+        File transactionFile5 = new File("data","transactions_20190308.data") ;
+        File transactionFile6 = new File("data","transactions_20190309.data") ;
+        File transactionFile7 = new File("data","transactions_20190310.data") ;
+        File transactionFile8 = new File("data","transactions_20190311.data") ;
 
         List<File> allFiles = new ArrayList<>();
-
-        allFiles.add(transactionFile1) ;
+        //allFiles.add(transactionFile1) ;
         allFiles.add(transactionFile2) ;
         allFiles.add(transactionFile3) ;
         allFiles.add(transactionFile4) ;
         allFiles.add(transactionFile5) ;
         allFiles.add(transactionFile6) ;
         allFiles.add(transactionFile7) ;
+        allFiles.add(transactionFile8) ;
+
+
 
         for (Iterator<File> itFile = allFiles.iterator(); itFile.hasNext();) {
             File currFile = itFile.next() ;
