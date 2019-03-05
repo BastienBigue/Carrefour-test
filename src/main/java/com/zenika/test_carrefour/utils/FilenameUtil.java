@@ -1,12 +1,17 @@
 package com.zenika.test_carrefour.utils;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FilenameUtil {
 
-    private static final String DATE_REGEXP = "([0-9]{8})\\." ;
-    private static final String MAGASINID_REGEXP = "([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12})" ;
+    static Logger log = LogManager.getLogger(FilenameUtil.class);
+
+    private static final String DATE_REGEXP = "_([0-9]{8})(-J7\\.|\\.)" ;
+    private static final String MAGASINID_REGEXP = "([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}|GLOBAL)" ;
     private static final Pattern dateRegExpPattern = Pattern.compile(DATE_REGEXP) ;
     private static final Pattern uuidRegExpPattern = Pattern.compile(MAGASINID_REGEXP) ;
 
@@ -82,12 +87,14 @@ public class FilenameUtil {
             } else if (type == FileType.STAGE5_2) {
                 return SET_CA.concat(HYPHEN).concat(GLOBAL).concat(FILENAME_SEPARATOR).concat(date).concat(HYPHEN).concat(J7).concat(DOT).concat(STAGE5_2);
             } else {
-                //ERROR System.out.println("Error in filename creation");
-                return "";
+                log.error("Error in filename creation : unknown FileType");
+                System.exit(1);
             }
         }
-        //ERROR System.out.println("Error in filename creation");
-        return "";
+        log.error("Error in filename creation : missing date");
+        System.exit(1);
+        return null;
+
     }
 
     static String buildFileName(String magasinId, String date, FileType type, int topN) {
@@ -109,10 +116,12 @@ public class FilenameUtil {
             } else if (type == FileType.RESULT_CA_GLOBAL_7J) {
                 return TOP.concat(FILENAME_SEPARATOR).concat(String.valueOf(topN)).concat(FILENAME_SEPARATOR).concat(CA).concat(FILENAME_SEPARATOR).concat(GLOBAL).concat(FILENAME_SEPARATOR).concat(date).concat(HYPHEN).concat(J7).concat(DOT).concat(DATA);
             } else {
-                System.out.println("Error in filename creation");
-                return "" ;
+                log.error("Error in filename creation : unknown FileType");
+                System.exit(1);
             }
         }
-        return "" ;
+        log.error("Error in filename creation : missing date");
+        System.exit(1);
+        return null ;
     }
 }
