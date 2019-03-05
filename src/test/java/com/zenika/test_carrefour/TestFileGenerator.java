@@ -84,12 +84,7 @@ public class TestFileGenerator {
     }
 
     private void generateReferenceProduitFileForOneStore(String idMagasin) {
-
-        File resultDirectory = new File(CommonConfig.DATA_SUBDIRECTORY);
-        if (!resultDirectory.exists()) {
-            resultDirectory.mkdirs();
-        }
-
+        
         File outputFile = FileBuilder.createReferenceProdFile(idMagasin,this.dateString);
 
         if (outputFile.exists()) {
@@ -120,11 +115,6 @@ public class TestFileGenerator {
         int idProduit;
         int qte;
         String randomDate ;
-
-        File resultDirectory = new File(CommonConfig.DATA_SUBDIRECTORY);
-        if (!resultDirectory.exists()) {
-            resultDirectory.mkdirs();
-        }
 
         if (outputFile.exists()) {
             log.warn("Transaction file already exists for this date. Not recreated. ");
