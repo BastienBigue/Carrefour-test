@@ -29,7 +29,7 @@ public class CAMapper {
         this.setProductFile = setProductFile;
         this.refPrixFile = refPrixFile;
         this.topN = topN ;
-        this.productCAMap = new HashMap<>() ;
+        this.productCAMap = new HashMap<>(131072) ;
         this.reBuildQteMap();
     }
 

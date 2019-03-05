@@ -23,7 +23,7 @@ public class TransactionFileMapper {
 
     public TransactionFileMapper(File file) {
         this.file = file ;
-        this.streamMap = new HashMap<>() ;
+        this.streamMap = new HashMap<>(2048) ;
         this.date = FilenameUtil.extractDate(this.file.getName()) ;
     }
 
