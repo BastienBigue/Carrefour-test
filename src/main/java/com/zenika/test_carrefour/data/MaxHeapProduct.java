@@ -107,6 +107,10 @@ public class MaxHeapProduct<T extends Comparable<T>> {
 
     //Returns topN elements from array. Removes them.
     public String[] extractTopN(int topN) {
+        int topNorAllproduct = Math.min(topN,this.size) ;
+        if (topNorAllproduct == this.size) {
+            log.warn("topN requested is greated than the number of products. Compute ranking over entire set of products");
+        }
         String [] result  = new String[topN];
         String currMax = null ;
         for (int i = 0; i < topN ; i++) {
