@@ -1,4 +1,4 @@
-package com.zenika.test_carrefour.mappers;
+package com.zenika.test_carrefour;
 
 import com.zenika.test_carrefour.Workflow;
 import com.zenika.test_carrefour.utils.FileBuilder;
