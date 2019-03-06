@@ -84,7 +84,7 @@ public class TestFileGenerator {
     }
 
     private void generateReferenceProduitFileForOneStore(String idMagasin) {
-        
+
         File outputFile = FileBuilder.createReferenceProdFile(idMagasin,this.dateString);
 
         if (outputFile.exists()) {
@@ -163,10 +163,11 @@ public class TestFileGenerator {
     }
 
     public static void main(String[] args) {
-        int nbProduits = 500000 ;
-        int nbMagasins = 500 ;
+        int nbProduits = 2000000 ;
+        int nbMagasins = 600 ;
         int nbTransactions = 10000000 ;
-        String[] dates = {"20190305", "20190306","20190307","20190308","20190309","20190310","20190311"};
+        String[] dates = {"20190611"};
+        //String[] dates = {"20190305", "20190306","20190307","20190308","20190309","20190310","20190311"};
         TestFileGenerator.generateFilesForXDays(dates,nbProduits,nbMagasins,nbTransactions);
 
 

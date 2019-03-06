@@ -1,6 +1,5 @@
 package com.zenika.test_carrefour;
 
-import com.zenika.test_carrefour.Workflow;
 import com.zenika.test_carrefour.utils.FileBuilder;
 import org.junit.Assert;
 import org.junit.Test;
@@ -134,7 +133,8 @@ public class WorkflowTest {
     @Test
     public void testWorkflowOneDay() {
         File transactionFile = new File("data", TEST_FILE);
-        Workflow.oneTransactionFileModeJob(transactionFile, TOP_N);
+        Workflow workflow = new Workflow();
+        workflow.processWorkflow(transactionFile, TOP_N, Workflow.REQUESTABLE_STAGES.ALL);
 
         /*
         top_100_ventes_2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.data

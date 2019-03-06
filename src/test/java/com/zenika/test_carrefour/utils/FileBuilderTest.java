@@ -1,6 +1,5 @@
 package com.zenika.test_carrefour.utils;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
