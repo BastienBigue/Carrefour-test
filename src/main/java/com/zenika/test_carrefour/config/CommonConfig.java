@@ -7,6 +7,4 @@ public class CommonConfig {
     public static final String TIMEZONE = "Europe/Paris" ;
     public static final String CSV_SEPARATOR = "|";
     public static final int SECONDS_PER_DAY = 24*60*60;
-    public static final String DATA_SUBDIRECTORY = "data" ;
-
 }

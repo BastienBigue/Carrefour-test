@@ -1,7 +1,6 @@
 package com.zenika.test_carrefour;
 
-import com.sun.corba.se.spi.orbutil.threadpool.Work;
-import com.zenika.test_carrefour.mappers.CAMapper;
+import com.zenika.test_carrefour.reducers.CACalculator;
 import com.zenika.test_carrefour.mappers.TransactionFileMapper;
 import com.zenika.test_carrefour.reducers.FloatReducer;
 import com.zenika.test_carrefour.reducers.IntegerReducer;
@@ -62,10 +61,13 @@ public class Workflow {
         long start = System.currentTimeMillis();
 
         File stage3File = FileBuilder.createStage3File(magasinId,dateString);
-        File setProduitFile = FileBuilder.createStage2File(magasinId,dateString) ;
+        File produitFile = FileBuilder.createStage2File(magasinId,dateString) ;
         File refPrixFile = FileBuilder.createReferenceProdFile(magasinId,dateString) ;
 
-        CAMapper processor = new CAMapper(refPrixFile, setProduitFile, topN, stage3File, FileBuilder.createCAMagasinFile(magasinId,dateString,topN));
+        HashSet<File> setProduitFile = new HashSet<>();
+        setProduitFile.add(produitFile) ;
+
+        CACalculator processor = new CACalculator(refPrixFile, setProduitFile, topN, stage3File, FileBuilder.createCAMagasinFile(magasinId,dateString,topN));
         processor.process();
 
         long end = System.currentTimeMillis();
@@ -351,7 +353,7 @@ public class Workflow {
          *  TransactionFileMapper
          *  foreach magasinId
          *      Stage1Reducer
-         *      CAMapper
+         *      CACalculator
          *
          *
          *
