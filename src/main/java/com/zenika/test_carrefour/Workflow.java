@@ -1,5 +1,6 @@
 package com.zenika.test_carrefour;
 
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 import com.zenika.test_carrefour.mappers.CAMapper;
 import com.zenika.test_carrefour.mappers.TransactionFileMapper;
 import com.zenika.test_carrefour.reducers.FloatReducer;
@@ -16,9 +17,15 @@ import java.util.*;
 
 public class Workflow {
 
+    public enum REQUESTABLE_STAGES{
+        STAGE2, STAGE3, STAGE4_1, STAGE4_2, STAGE4_3, STAGE4_4, STAGE5_1, STAGE5_2, ALL
+    }
+
+    public Workflow(){};
+
     static Logger log = LogManager.getLogger(Workflow.class);
 
-    public static Set<String>  computeStage1(File transactionFile) {
+    private static Set<String>  computeStage1(File transactionFile) {
         log.info("Starting compute of Stage1 with input file " + transactionFile.getName());
         long start = System.currentTimeMillis();
 
@@ -31,7 +38,7 @@ public class Workflow {
         return magasinsId;
     }
 
-    public static Map<String, Integer> computeStage2(String magasinId, String dateString, int topN) {
+    private static void computeStage2(String magasinId, String dateString, int topN) {
         log.info("Starting compute of Stage2 for store " + magasinId + " ; date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -48,10 +55,9 @@ public class Workflow {
         long end = System.currentTimeMillis();
         log.info("Compute of Stage2 done");
         log.debug("computeStage2 took " + String.valueOf(end-start) + " ms");
-        return productQteMap;
     }
 
-    public static Map<String, Float> computeStage3(String magasinId, String dateString, int topN) {
+    private static void computeStage3(String magasinId, String dateString, int topN) {
         log.info("Starting compute of Stage3 for store " + magasinId + " ; date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -60,15 +66,14 @@ public class Workflow {
         File refPrixFile = FileBuilder.createReferenceProdFile(magasinId,dateString) ;
 
         CAMapper processor = new CAMapper(refPrixFile, setProduitFile, topN, stage3File, FileBuilder.createCAMagasinFile(magasinId,dateString,topN));
-        Map<String, Float> productCAMap = processor.process();
+        processor.process();
 
         long end = System.currentTimeMillis();
         log.info("Compute of Stage3 done");
         log.debug("computeStage3 took " + String.valueOf(end-start) + " ms");
-        return productCAMap ;
     }
 
-    public static Map<String, Integer> computeStage4_3(String magasinId, String dateString, int topN) {
+    private static void computeStage4_3(String magasinId, String dateString, int topN) {
         log.info("Starting compute of Stage4_3 for store " + magasinId + " ; date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -93,10 +98,9 @@ public class Workflow {
         } else {
             log.info("There are files missing to create stage4_3 file (VenteMagasin7J)");
         }
-        return productVenteGlobal7JMap;
     }
 
-    public static Map<String, Float> computeStage4_4(String magasinId, String dateString, int topN) {
+    private static void computeStage4_4(String magasinId, String dateString, int topN) {
         log.info("Starting compute of Stage4_4 for store " + magasinId + " ; date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -120,10 +124,9 @@ public class Workflow {
         } else {
             log.info("There are files missing to create stage4_4 file (CAMagasin7J)");
         }
-        return productCAGlobal7JMap;
     }
 
-    public static Map<String, Integer> computeStage4_1(Set<String> magasinsIdToGlobal, String dateString, int topN) {
+    private static void computeStage4_1(Set<String> magasinsIdToGlobal, String dateString, int topN) {
         log.info("Starting compute of Stage4_1 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -144,10 +147,9 @@ public class Workflow {
         } else {
             log.info("There are files missing to create stage4_1 file (VenteGlobal)");
         }
-        return productVenteGlobal ;
     }
 
-    public static Map<String, Float> computeStage4_2(Set<String> magasinsIdToGlobal, String dateString, int topN) {
+    private static void computeStage4_2(Set<String> magasinsIdToGlobal, String dateString, int topN) {
         log.info("Starting compute of Stage4_2 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -169,10 +171,9 @@ public class Workflow {
         } else {
             log.info("There are files missing to create stage4_2 file (CAGlobal)");
         }
-        return productCAGlobal;
     }
 
-    public static void computeStage5_1(String dateString, int topN) {
+    private static void computeStage5_1(String dateString, int topN) {
         log.info("Starting compute of Stage5_1 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -199,7 +200,7 @@ public class Workflow {
 
     }
 
-    public static void computeStage5_2(String dateString, int topN) {
+    private static void computeStage5_2(String dateString, int topN) {
         log.info("Starting compute of Stage5_2 for date " + dateString + " ; topN " + topN);
         long start = System.currentTimeMillis();
 
@@ -224,32 +225,61 @@ public class Workflow {
         }
     }
 
+    public void processWorkflow(File transactionFile, int topN, REQUESTABLE_STAGES stage) {
 
-
-    public static void oneTransactionFileModeJob(File transactionFile, int topN) {
-
+        long start = System.currentTimeMillis();
 
         String dateString = FilenameUtil.extractDate(transactionFile.getName());
-        Set<String> magasinsIdInTransactionFile = Workflow.computeStage1(transactionFile) ;
+        Set<String> magasinsIdInTransactionFile = this.computeStage1(transactionFile) ;
 
         for (Iterator<String> it = magasinsIdInTransactionFile.iterator(); it.hasNext(); ) {
             String magasinId = it.next();
-            //TODO use Map/Set produced
-            //TODO refactor CA/Qte REducers
 
-            Workflow.computeStage2(magasinId,dateString, topN);
-            Workflow.computeStage3(magasinId,dateString,topN);
-            Workflow.computeStage4_3(magasinId,dateString,topN);
-            Workflow.computeStage4_4(magasinId,dateString,topN);
+            if (stage == REQUESTABLE_STAGES.STAGE2 || stage == REQUESTABLE_STAGES.STAGE3 ||
+                    stage == REQUESTABLE_STAGES.STAGE4_1 || stage == REQUESTABLE_STAGES.STAGE4_2 ||
+                    stage == REQUESTABLE_STAGES.STAGE4_3 || stage == REQUESTABLE_STAGES.STAGE4_4 ||
+                    stage == REQUESTABLE_STAGES.STAGE5_1 || stage == REQUESTABLE_STAGES.STAGE5_2||
+                    stage == REQUESTABLE_STAGES.ALL) {
+                Workflow.computeStage2(magasinId,dateString, topN);
+            }
+
+            if (stage == REQUESTABLE_STAGES.STAGE3 ||
+                    stage == REQUESTABLE_STAGES.STAGE4_2 || stage == REQUESTABLE_STAGES.STAGE4_4 ||
+                    stage == REQUESTABLE_STAGES.STAGE5_2 || stage == REQUESTABLE_STAGES.ALL) {
+
+                Workflow.computeStage3(magasinId, dateString, topN);
+            }
+            if (stage == REQUESTABLE_STAGES.STAGE4_3 || stage == REQUESTABLE_STAGES.ALL) {
+                Workflow.computeStage4_3(magasinId, dateString, topN);
+            }
+
+            if (stage == REQUESTABLE_STAGES.STAGE4_4 || stage == REQUESTABLE_STAGES.ALL) {
+                Workflow.computeStage4_4(magasinId, dateString, topN);
+            }
 
         }
-        Workflow.computeStage4_1(magasinsIdInTransactionFile, dateString,topN);
-        Workflow.computeStage4_2(magasinsIdInTransactionFile,dateString,topN);
-        Workflow.computeStage5_1(dateString,topN);
-        Workflow.computeStage5_2(dateString,topN);
 
+        if (stage == REQUESTABLE_STAGES.STAGE4_1 || stage == REQUESTABLE_STAGES.STAGE5_1 ||
+                stage == REQUESTABLE_STAGES.ALL) {
+            Workflow.computeStage4_1(magasinsIdInTransactionFile, dateString, topN);
+        }
 
+        if (stage == REQUESTABLE_STAGES.STAGE4_2 || stage == REQUESTABLE_STAGES.STAGE5_2 ||
+                stage == REQUESTABLE_STAGES.ALL) {
+            Workflow.computeStage4_2(magasinsIdInTransactionFile, dateString, topN);
+        }
+        if (stage == REQUESTABLE_STAGES.STAGE5_1 || stage == REQUESTABLE_STAGES.ALL) {
+            Workflow.computeStage5_1(dateString, topN);
+        }
+        if (stage == REQUESTABLE_STAGES.STAGE5_2 || stage == REQUESTABLE_STAGES.ALL) {
+            Workflow.computeStage5_2(dateString, topN);
+        }
+
+        long end = System.currentTimeMillis();
+        log.info("Workflow done for date " + dateString + " and for " + magasinsIdInTransactionFile.size() + " stores !") ;
+        log.info("Process workflow took" + String.valueOf(end-start) + " ms") ;
     }
+
 
     private static boolean allFilesExist(Set<File> files) {
         boolean allFilesExists = true;
@@ -287,9 +317,9 @@ public class Workflow {
             File currFile = itFile.next() ;
             long start = System.currentTimeMillis();
 
-            Workflow.oneTransactionFileModeJob(currFile,100);
+            //Workflow.oneTransactionFileModeJob(currFile,100);
             long end = System.currentTimeMillis();
-            System.out.println("Workflow took " + String.valueOf(end-start) + "ms for transaction file " + currFile.getName());
+            System.out.println("Workflow took " + String.valueOf(end-start) + " ms for transaction file " + currFile.getName());
         }
 
 
