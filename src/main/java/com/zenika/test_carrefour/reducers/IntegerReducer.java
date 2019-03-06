@@ -11,6 +11,8 @@ public class IntegerReducer extends Reducer<Integer> {
         super(filesToAggregate, topN, outputFullFile, outputTopNSortedFile);
     }
 
+    //Parse the line and expects to find a Float as currentLine[1]. Add each line to the productMap.
+    //If a line can't be parser, it is discarded.
     public void parseAndInsertInMap(String[] currentLine) {
         String product = currentLine[0];
         try {
@@ -20,6 +22,7 @@ public class IntegerReducer extends Reducer<Integer> {
         }
     }
 
+    //Converts a record into a String writable in result or stage file.
     public String buildLine(String product, Integer value) {
         return product.concat(CommonConfig.CSV_SEPARATOR).concat(this.productMap.get(product).toString());
     }

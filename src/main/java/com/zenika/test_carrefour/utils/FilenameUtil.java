@@ -6,6 +6,10 @@ import org.apache.logging.log4j.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+/*
+This class is a utilitary to interact with filenames. It can build all the necessary file names and extract date/magasinId.
+ */
 public class FilenameUtil {
 
     static Logger log = LogManager.getLogger(FilenameUtil.class);
@@ -41,18 +45,22 @@ public class FilenameUtil {
     static final String STAGE5_2 = "stage5-2" ;
     static final String RESULT = "result" ;
 
+    //An enum that represents all the possible type of files.
     enum FileType {
         TRANSACTION_FILE, REF_PROD, STAGE1, STAGE2, STAGE3, STAGE4_1, STAGE4_2, STAGE4_3, STAGE4_4, STAGE5_1, STAGE5_2, RESULT_VENTES_MAGASIN, RESULT_CA_MAGASIN, RESULT_VENTES_GLOBAL, RESULT_CA_GLOBAL, RESULT_VENTES_MAGASIN_7J, RESULT_CA_MAGASIN_7J, RESULT_VENTES_GLOBAL_7J, RESULT_CA_GLOBAL_7J,
     }
 
+    //extract the date from the filename
     public static String extractDate(String filename) {
         return FilenameUtil.matchRegexp(filename, dateRegExpPattern);
     }
 
+    //extract the magasinId from the filename
     public static String extractMagasinId(String filename) {
         return FilenameUtil.matchRegexp(filename, uuidRegExpPattern) ;
     }
 
+    //Extract the given pattern from the filename
     private static String matchRegexp(String filename, Pattern pattern) {
         Matcher matcher = pattern.matcher(filename) ;
         String match = null;
@@ -62,6 +70,7 @@ public class FilenameUtil {
         return match ;
     }
 
+    //build stages and data file names.
     static String buildFileName(String magasinId, String date, FileType type) {
         if (date != null) {
             if (type == FileType.TRANSACTION_FILE) {
@@ -97,6 +106,7 @@ public class FilenameUtil {
 
     }
 
+    //build result filenames
     static String buildFileName(String magasinId, String date, FileType type, int topN) {
         if (date != null) {
             if (type == FileType.RESULT_VENTES_MAGASIN && magasinId != null)  {

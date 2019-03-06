@@ -40,6 +40,7 @@ public class CLIOptions {
 
     public final OptionParser parser;
 
+    //Command line interface configuration
     public CLIOptions(String[] args) {
 
         this.parser = new OptionParser(false) ;
@@ -71,6 +72,7 @@ public class CLIOptions {
         stages.add(caGlobalJ7SpecBuilder);
         stages.add(allSpecBuilder);
 
+        //User can only specify a single stage (or the all stage)
         parser.mutuallyExclusive(venteMagasinSpecBuilder, caMagasinSpecBuilder, venteGlobalSpecBuilder, caGlobalSpecBuilder, venteMagasinJ7SpecBuilder, caMagasinJ7SpecBuilder, venteGlobalJ7SpecBuilder, caGlobalJ7SpecBuilder, allSpecBuilder);
 
         options = parser.parse(args);

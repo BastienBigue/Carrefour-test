@@ -17,10 +17,9 @@ public class CACalculator extends FloatReducer {
         this.refPrixFile = refPrixFile;
     }
 
+    //Read a stage2 file (produit|qte) from one store. Rebuild the associated Map(produit|qte).
     private void reBuildQteMap() {
         long start =  System.currentTimeMillis();
-        String product;
-        Float qte;
         String[] currentLine;
 
 
@@ -50,6 +49,9 @@ public class CACalculator extends FloatReducer {
         log.debug("reBuildQteMap using stage1 file took " + String.valueOf(end-start) + "ms");
     }
 
+    //Using Map<product, qte> and refPrixFile, computes CA for each product and stores it in the same map.
+    //Maintains the list of products that have been found in refPrixFile. If a product is missing in this file, it is deleted from the map.
+    //This avoids to have some records which are still <product, qte>.
     private void buildCAMap() {
         long start = System.currentTimeMillis();
         String product;
@@ -88,7 +90,7 @@ public class CACalculator extends FloatReducer {
         log.debug("Compute CA for all products took " + String.valueOf(end-start) + "ms");
     }
 
-
+    //Realize the entire process. Write stage file and result files.
     public void process() {
         this.reBuildQteMap();
         this.buildCAMap();

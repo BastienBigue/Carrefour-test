@@ -27,6 +27,7 @@ public class TransactionFileMapper {
         this.date = FilenameUtil.extractDate(this.file.getName()) ;
     }
 
+    //Read TransactionFile, maintains a Map<magasinId, BufferedOutputStream> and maps each input line (only produit|qte) to appropriate output file.
     public Set<String> processTransactionFile() {
 
         String magasin;
@@ -66,16 +67,4 @@ public class TransactionFileMapper {
         }
         return this.streamMap.keySet();
     }
-
-  /*  public static void main(String[] args) {
-        File transactionFile = new File(DATA_BASTIEN_SUBDIRECTORY,"transactions_20190302.data") ;
-
-        TransactionFileMapper mapper = new TransactionFileMapper(transactionFile) ;
-        if (FilenameUtil.extractDate(transactionFile.getName()) != null) {
-                long start = System.currentTimeMillis() ;
-                mapper.processTransactionFile();
-                long end = System.currentTimeMillis() ;
-                System.out.println("TransactionFile mapper = " + String.valueOf(end-start) + "ms");
-        }
-    }*/
 }

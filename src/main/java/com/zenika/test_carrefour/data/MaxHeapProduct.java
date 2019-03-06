@@ -1,6 +1,5 @@
 package com.zenika.test_carrefour.data;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -47,6 +46,7 @@ public class MaxHeapProduct<T extends Comparable<T>> {
         return false;
     }
 
+    //Swap the 2 given nodes
     private void swap(int fpos, int spos) {
         String tmp;
         tmp = Heap[fpos];
@@ -54,6 +54,7 @@ public class MaxHeapProduct<T extends Comparable<T>> {
         Heap[spos] = tmp;
     }
 
+    //Heapify subtree whose root node is i.
     private void heapify(int i)
     {
         int largest = i; // Initialize largest as root
@@ -77,6 +78,7 @@ public class MaxHeapProduct<T extends Comparable<T>> {
         }
     }
 
+    //Pretty print tree
     public void print() {
         for (int i = 0; i < this.size/2; i++) {
             System.out.print(" PARENT : " + productMap.get(Heap[i]) + " LEFT CHILD : " +
@@ -85,7 +87,7 @@ public class MaxHeapProduct<T extends Comparable<T>> {
         }
     }
 
-
+    //Build tree with keys of map. Keys are inserted without heapifying. Heapify is done on the non-leaf nodes to order the entire tree.
     private void buildTree() {
         long start = System.currentTimeMillis() ;
         Heap = this.productMap.keySet().toArray(new String[0]) ;

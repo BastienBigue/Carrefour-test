@@ -11,8 +11,12 @@ import java.util.TimeZone;
 import java.util.Set;
 import java.util.HashSet;
 
-public class FileBuilder {
 
+// This class builds all File objects and creates the necessary directory .
+// It uses FilenameUtil to build any necessary type of file (any stage, transactions, reference-prod, results).
+// Depending on type of file, it may/may not need the magasinId and the topN value.
+// Date is mandatory.
+public class FileBuilder {
 
     /*
     Example data files
@@ -109,6 +113,9 @@ public class FileBuilder {
         return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.STAGE5_2)) ;
     }
 
+    /*
+    This function creates
+     */
     private static Set<File> createStageNLast7DaysFiles(String magasinsId, String dateString, FilenameUtil.FileType fileType) throws Exception {
 
         Set<File> lastSevenDays = new HashSet<>() ;
@@ -218,7 +225,4 @@ public class FileBuilder {
         }
         return new File(parent, FilenameUtil.buildFileName(null,date, FilenameUtil.FileType.RESULT_CA_GLOBAL_7J, topN)) ;
     }
-
-
-
 }

@@ -8,8 +8,8 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
 
+//This class enables to reduce a set of stage file. It is generic to be able to build Map<String, Integer> (for sales) or Map<String, Float> (for CA).
 public abstract class Reducer<T> {
 
     static Logger log = LogManager.getLogger(Reducer.class);
@@ -28,10 +28,13 @@ public abstract class Reducer<T> {
         this.productMap = new HashMap<>(131072) ;
     }
 
+    //Must be implemented by child classes.
     public abstract void parseAndInsertInMap(String[] value);
 
+    //Must be implemented by child classes.
     public abstract String buildLine(String product, T value);
 
+    //Build Map<product, qte> or Map<product, CA> using the given set of file.
     private void buildMap() {
         long start = System.currentTimeMillis();
         String[] currentLine;
@@ -56,6 +59,7 @@ public abstract class Reducer<T> {
         log.debug("buildMap took " + String.valueOf(end-start) + "ms");
     }
 
+    //Writes the entire map to a stage file.
     protected void writeFullFile() {
         long start = System.currentTimeMillis();
 
@@ -80,6 +84,7 @@ public abstract class Reducer<T> {
     }
 
 
+    //Build a MaxHeap tree from Map keys. Sort it and returns the top N elements.
     protected String[] getTopN() {
         long start = System.currentTimeMillis();
         MaxHeapProduct maxHeap = new MaxHeapProduct(productMap) ;
@@ -90,6 +95,7 @@ public abstract class Reducer<T> {
     }
 
 
+    //Write the top N elements and their value to the appropriate result file.
     protected void writeSortedResultFile(String[] result) {
         long start = System.currentTimeMillis();
         String outputLine = null ;
@@ -114,11 +120,11 @@ public abstract class Reducer<T> {
 
     }
 
-    public Map<String,T> reduce() {
+    //Realize the entire process. Write stage file and result files.
+    public void reduce() {
         this.buildMap();
         this.writeFullFile();
         String [] result = this.getTopN();
         this.writeSortedResultFile(result);
-        return this.productMap ;
     }
 }

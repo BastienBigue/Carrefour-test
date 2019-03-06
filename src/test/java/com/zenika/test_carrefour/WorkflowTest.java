@@ -134,7 +134,7 @@ public class WorkflowTest {
     public void testWorkflowOneDay() {
         File transactionFile = new File("data", TEST_FILE);
         Workflow workflow = new Workflow();
-        workflow.processWorkflow(transactionFile, TOP_N, Workflow.REQUESTABLE_STAGES.ALL);
+        workflow.processWorkflow(transactionFile, TOP_N, Workflow.RequestableStage.ALL);
 
         /*
         top_100_ventes_2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71_20170514.data

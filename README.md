@@ -65,7 +65,7 @@ Les stages suivant sont le résultat des agrégation sur 7 jours. Ils ne peuvent
 Les fichiers de chaque stage à partir du stage2 sont générés à partir d'une HashMap dont les clés sont les produitId et la valeur leur nombre de ventes ou leur CA. L'obtention du top N des ventes ou du CA se base sur cette HashMap pour réaliser son tri. 
 
 Le fonctionnement peut être résumé avec le graphe ci-dessous :
-
+(Si le graphe n'apparait pas, copier et coller le bloc ci-dessous ici : https://stackedit.io/app#)
 ```mermaid
 graph TD
 reference_prod-ID_MAGASIN_YYYYMMDD.data --> stage3
