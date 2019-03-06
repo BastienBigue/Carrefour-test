@@ -1,6 +1,8 @@
 package com.zenika.test_carrefour;
 
 import com.zenika.test_carrefour.utils.FileBuilder;
+import com.zenika.test_carrefour.utils.FilenameUtil;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -11,7 +13,6 @@ import java.util.List;
 public class WorkflowTest {
 
     private static final String DATE_TEST_GIVEN_DATA = "20170514";
-    private static final String[] DATE_TEST = {"19960610"} ;
 
     private static final String TEST_FILE = "transactions_20170514.data" ;
     private static final int TOP_N = 100 ;
@@ -19,12 +20,7 @@ public class WorkflowTest {
 
     private static final String MAGASINID = "2a4b6b81-5aa2-4ad8-8ba9-ae1a006e7d71" ;
 
-    private static final String[] folders = {"stage1", "stage2", "stage3", "stage4-1", "stage4-2", "stage4-3", "stage4-4", "stage5-1", "stage5-2", "result", "data"};
-
-    /*@BeforeClass
-    public static void  createTestsFiles() {
-        TestFileGenerator.generateFilesForXDays(DATE_TEST_GIVEN_DATA, NB_PRODUITS, NB_MAGASINS, NB_TRANSACTIONS);
-    }
+    private static final String[] folders = {"stage1", "stage2", "stage3", "stage4-1", "stage4-2", "stage4-3", "stage4-4", "stage5-1", "stage5-2", "result"};
 
     @AfterClass
     public static void deleteTestFiles() {
@@ -34,17 +30,17 @@ public class WorkflowTest {
             File[] filesToDelete = currFolderFile.listFiles(new FilenameFilter() {
                 @Override
                 public boolean accept(final File dir, final String name) {
-                    return FilenameUtil.extractDate(name).equals(DATE_TEST);
+                    return FilenameUtil.extractDate(name).equals(DATE_TEST_GIVEN_DATA);
                 }
             });
 
             for ( final File file : filesToDelete ) {
                 if ( !file.delete() ) {
-                    System.err.println( "Can't remove " + file.getAbsolutePath() );
+                    System.err.println("Can't remove " + file.getAbsolutePath() );
                 }
             }
         }
-    }*/
+    }
 
     private class KeyValuePosition<E> {
         private String key ;
