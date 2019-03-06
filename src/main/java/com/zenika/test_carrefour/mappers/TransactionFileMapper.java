@@ -32,20 +32,22 @@ public class TransactionFileMapper {
         String magasin;
         String produit;
         String[] currentLine;
+        String qte ;
+        String outputLine ;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             for (String line; (line = br.readLine()) != null; ) {
                 currentLine = line.split("\\|") ;
                 magasin = currentLine[2] ;
                 produit = currentLine[3] ;
-                String qte = currentLine[4] ;
+                qte = currentLine[4] ;
                 BufferedOutputStream outputStream = this.streamMap.get(magasin) ;
                 if (outputStream == null) {
                     File currFile = FileBuilder.createStage1File(magasin,date) ;
                     outputStream = new BufferedOutputStream(new FileOutputStream(currFile)) ;
                     this.streamMap.put(magasin, outputStream) ;
                 }
-                String outputLine = produit.concat(CommonConfig.CSV_SEPARATOR).concat(qte) ;
+                outputLine = produit.concat(CommonConfig.CSV_SEPARATOR).concat(qte) ;
                 outputStream.write(outputLine.getBytes());
                 outputStream.write(System.lineSeparator().getBytes());
             }

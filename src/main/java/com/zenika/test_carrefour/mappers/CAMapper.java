@@ -152,12 +152,11 @@ public class CAMapper {
         log.debug("Write file " + this.outputTopNSortedFile + "took " + String.valueOf(end-start)+ "ms");
     }
 
-    public Map<String, Float> process() {
+    public void process() {
         this.buildCAMap();
         this.writeStage3File();
         String [] result = this.getTopN();
         this.writeSortedResultFile(result);
-        return this.productCAMap ;
     }
 
     /*public static void main(String[] args) {
