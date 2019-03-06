@@ -1,6 +1,5 @@
 package com.zenika.test_carrefour.reducers;
 
-import com.zenika.test_carrefour.config.CommonConfig;
 import com.zenika.test_carrefour.data.MaxHeapProduct;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -30,6 +29,8 @@ public abstract class Reducer<T> {
     }
 
     public abstract void parseAndInsertInMap(String[] value);
+
+    public abstract String buildLine(String product, T value);
 
     private void buildMap() {
         long start = System.currentTimeMillis();
@@ -61,7 +62,7 @@ public abstract class Reducer<T> {
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputFullFile))) {
             String outputLine = null;
             for (String k : this.productMap.keySet()) {
-                outputLine = k.concat(CommonConfig.CSV_SEPARATOR).concat(this.productMap.get(k).toString());
+                outputLine = this.buildLine(k, this.productMap.get(k));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
@@ -95,7 +96,7 @@ public abstract class Reducer<T> {
 
         try(BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(outputTopNSortedFile))) {
             for (int i = 0 ; i < result.length ; i++) {
-                outputLine = result[i].concat(CommonConfig.CSV_SEPARATOR).concat(this.productMap.get(result[i]).toString());
+                outputLine = this.buildLine(result[i], this.productMap.get(result[i]));
                 bo.write(outputLine.getBytes());
                 bo.write(System.lineSeparator().getBytes());
             }
