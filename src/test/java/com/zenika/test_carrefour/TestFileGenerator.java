@@ -163,7 +163,7 @@ public class TestFileGenerator {
     }
 
     public static void main(String[] args) {
-        int nbProduits = 2000000 ;
+        int nbProduits = 1000000 ;
         int nbMagasins = 600 ;
         int nbTransactions = 10000000 ;
         String[] dates = {"20190611"};

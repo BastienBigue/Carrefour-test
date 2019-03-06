@@ -25,16 +25,20 @@ Maven (https://maven.apache.org/install.html)
 
 # Lancer le projet
 
-`java -jar -Xms128m -Xmx512m target/CarrefourIndicatorGenerator.jar --\<stage> --topN=\<topN> --file=data/<fichier_transactions>`
+Afin de lancer le projet, il faut se placer dans le répertoire parent du répertoire *data* où se trouvent les données. 
+
+On peut ensuite lancer la commande suivante : 
+
+`java -jar -Xms128m -Xmx512m target/CarrefourIndicatorGenerator-jar-with-dependencies.jar --<stage> --topN=<topN> --file=data/<fichier_transactions>`
 
 Avec  : 
-+ *stage* qui prend une des valeurs suivantes : *{"venteMagasin", "caMagasin", "venteGlobal", "caGlobal", "venteMagasinJ7", "caMagasinJ7", "venteGlobalJ7", "caGlobalJ7", "all"}*
++ *stage* qui prend une des valeurs suivantes (sans les ""): *{"venteMagasin", "caMagasin", "venteGlobal", "caGlobal", "venteMagasinJ7", "caMagasinJ7", "venteGlobalJ7", "caGlobalJ7", "all"}*
 + *topN* : sur combien de produits doit être réalisé le classement
 + *file* : le fichier de transactions   
 
-Exemple : java -jar -Xms128m -Xmx512m target/CarrefourIndicatorGenerator.jar --all --topN=100 --file=data/transactions_20170514.data
-
-Les fichiers de résultats seront produit dans le répertoire *$RACINE_PROJET/result*
+Exemple : java -jar -Xms128m -Xmx512m target/CarrefourIndicatorGenerator-jar-with-dependencies.jar --all --topN=100 --file=data/transactions_20170514.data
+ 
+Les fichiers de résultats seront produit dans le répertoire *./result*
 
 # Fonctionnement
 
@@ -43,14 +47,14 @@ Le traitement des données se fait via un workflow. Ce workflow permet, selon le
 Les explications qui suivent détaillent le fonctionnement du workflow complet, c'est-à-dire avec l'ensemble des traitements qu'il est capable de lancer.
 
 Le traitement est divisé en 9 étapes de calcul.
-Si une étape de calcul génère un indicateur attendu (topvente/magasin, topca/magasin,etc.), le fichier adéquat est produit dans le répertoire *$RACINE_PROJET/result* 
+Si une étape de calcul génère un indicateur attendu (topvente/magasin, topca/magasin,etc.), le fichier adéquat est produit dans le répertoire *./result* 
 
-Le résultat complet de chaque étape est écrit sur disque afin de pouvoir les réutiliser le résultat pour un traitement futur. 
+Le résultat complet de chaque étape est écrit sur disque afin de pouvoir les réutiliser pour un traitement futur. 
 
 
-En tout, 9 traitement sont réalisés. Voici le contenu des fichiers produit par chacun : 
+En tout, 9 traitement sont réalisés. Voici le contenu des fichiers produits par chacun : 
 
-+ ***stage1*** :  un fichier par magasin présent dans le fichier de transactions, où chaque ligne contient *produit|qte* avec PLUSIEURS occurrences pour chaque*produit*. Ici, *qte* contient ne contient que la *qte* présente sur la ligne du fichier *transactions*.
++ ***stage1*** :  un fichier par magasin présent dans le fichier de transactions, où chaque ligne contient *produit|qte* avec ***PLUSIEURS*** occurrences pour chaque*produit*. Ici, *qte* contient ne contient que la *qte* présente sur la ligne du fichier *transactions*.
 + ***stage2*** : un fichier par magasin, où chaque ligne contient *produit|qte* avec une seule occurrence de chaque produit. Ici, *qte* contient le nombre de ventes total du produit pour le magasin en question. A ce stage, on peut donc générer `top_N_ventes_<ID_MAGASIN>_YYYYMMDD.data` pour chaque magasin. 
 + ***stage3*** : un fichier par magasin, où chaque ligne contient *produit|ca* avec une seule occurrence de chaque produit. Ici, *ca* contient le CA total du produit sur le magasin en question. A ce stage, on peut donc générer `top_N_ca_<ID_MAGASIN>_YYYYMMDD.data`
 + ***stage4-1*** : un seul fichier par jour pour l'ensemble des magasins. Chaque ligne contient *produit|qte* où *qte* est le nombre de vente total du produit sur l'ensemble des magasin. A ce stage, on peut donc générer `top_N_vente_GLOBAL_YYYYMMDD.data`
@@ -100,9 +104,17 @@ Afin de réaliser les traitements, le projet contient 3 composants principaux :
 
 
 Enfin, la dernière partie importante du projet est l'algorithme de tri. En effet, cet algorithme est nécessaire afin de calculer le top N à chaque étape. 
-Il est basé sur un MaxHeap et est représenté dans un tableau contenant l'id de chaque  produit. Le tableau est construit à partir de l'ensemble des clés des Map précédemment évoquées. **Il n'est pas trié lors de sa construction.** Le tableau est ensuite ordonné en utilisant la Map depuis laquelle il a été créé afin d'ordonner les produits selon leur valeur de *qte* ou de *ca*. Cela permet d'obtenir une complexité de O(n) sur la construction de l'arbre. Cette structure de donnée permet ensuite de récupérer les k maximum avec  une complexité de *O(k \* log(n))*.
+Il est basé sur un MaxHeap et est représenté dans un tableau contenant l'id de chaque produit. Le tableau est construit à partir de l'ensemble des clés des Map précédemment évoquées. **Il n'est pas trié lors de sa construction.** 
+Le tableau est ensuite ordonné en utilisant la Map depuis laquelle il a été créé afin d'ordonner les produits selon leur valeur de *qte* ou de *ca*. 
+Cela permet d'obtenir une complexité de O(n) sur la construction de l'arbre. Cette structure de donnée permet ensuite de récupérer les k maximum avec  une complexité de *O(k \* log(n))*.
 
 Plus de détails ici : https://www.geeksforgeeks.org/time-complexity-of-building-a-heap/ et ici : https://en.wikipedia.org/wiki/Binary_heap#Building_a_heap 
 
 
-Vous pourrez trouver plus de détails dans le code source.
+Vous pourrez trouver plus de détails dans les commentaires du code source.
+
+## Tests de performance
+
+Test sur 1 jour ; 1200 magasins ; 10000000 transactions ; 1000000 produits : 8'30"
+Test sur 1 jour ; 600 magasins ; 10000000 transactions ; 1000000 produits : 5'26
+Test sur 7 jours ; 500 magasins ; 10000000 transactions ; 500000 produits : 29'00"
