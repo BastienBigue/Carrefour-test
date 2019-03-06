@@ -17,8 +17,8 @@ Les noms des fichiers de référentiels produit-prix doivent être au format sui
 # Builder le projet
 
 ## Prérequis  
-Java 8 (https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-Maven (https://maven.apache.org/install.html)
++ Java 8 (https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
++ Maven (https://maven.apache.org/install.html)
 ## Builder le projet avec maven
 
 `mvn clean install`
