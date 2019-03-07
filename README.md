@@ -23,6 +23,11 @@ Les noms des fichiers de référentiels produit-prix doivent être au format sui
 
 `mvn clean install`
 
+Lors du build, les tests sont réalisés. Les tests utilisent les données présentes dans le répertoire data du repository. 
+Si vous n'avez pas récupéré ces données, vous pouvez builder le projet sans passer les tests : 
+
+`mvn clean install -DskipTests`
+
 # Lancer le projet
 
 Afin de lancer le projet, il faut se placer dans le répertoire parent du répertoire *data* où se trouvent les données. 
@@ -69,24 +74,8 @@ Les stages suivant sont le résultat des agrégation sur 7 jours. Ils ne peuvent
 Les fichiers de chaque stage à partir du stage2 sont générés à partir d'une HashMap dont les clés sont les produitId et la valeur leur nombre de ventes ou leur CA. L'obtention du top N des ventes ou du CA se base sur cette HashMap pour réaliser son tri. 
 
 Le fonctionnement peut être résumé avec le graphe ci-dessous :
-(Si le graphe n'apparait pas, copier et coller le bloc ci-dessous ici : https://stackedit.io/app#)
-```mermaid
-graph TD
-reference_prod-ID_MAGASIN_YYYYMMDD.data --> stage3
-transactions_YYYYMMDD.data --> stage1
-stage1[stage1] --> stage2[stage2 & top_100_ventes_<ID_MAGASIN>_YYYYMMDD.data]
-stage2 --> stage3[stage3 & top_100_ca_<ID_MAGASIN>_YYYYMMDD.data]
-subgraph ventes
-stage2 --> stage4-1[stage4-1 & top_100_ventes_GLOBAL_YYYYMMDD.data]
-stage2 --> stage4-3[stage4-3 & top_100_ventes_<ID_MAGASIN>_YYYYMMDD-J7.data]
-stage4-1 --> stage5-1[stage5-1 & top_100_ventes_GLOBAL_YYYYMMDD-J7.data]
-end 
-subgraph CA
-stage3 --> stage4-2[stage4-2 & top_100_ca_GLOBAL_YYYYMMDD.data]
-stage3 --> stage4-4[stage4-4 & top_100_ca_<ID_MAGASIN>_YYYYMMDD-J7.data]
-stage4-2 --> stage5-2[stage5-2 & top_100_ca_GLOBAL_YYYYMMDD-J7.data]
-end
-```
+
+![Workflow](./workflow.png)
 
 Afin de réaliser les traitements, le projet contient 3 composants principaux :
 + TransactionFileMapper : cet objet permet de lire le fichier de *transactions* et de produire un fichier par magasin présent. Il est utilisé pour produire le *stage1*. Les fichiers produits contiennent donc plusieurs occurrences de chaque produit. Pour réaliser cela, le TransactionFileMapper maintient un BufferedOutputStream ouvert pour chaque magasin afin de mapper la donnée en cours vers le bon fichier.
