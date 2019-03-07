@@ -89,8 +89,7 @@ public class Workflow {
         try {
             stage2Last7DaysFiles = FileBuilder.createStage2Last7DaysFiles(magasinId, dateString);
         } catch (Exception e) {
-            log.error("Error in createStage2Last7DaysFiles : files have not been created -- Exit") ;
-            e.printStackTrace();
+            log.error("Error in createStage2Last7DaysFiles : files have not been created -- Exit",e) ;
             System.exit(1);
         }
 
@@ -116,8 +115,7 @@ public class Workflow {
         try {
             stage3Last7DaysFiles = FileBuilder.createStage3Last7DaysFiles(magasinId, dateString);
         } catch (Exception e) {
-            log.error("Error in createStage3Last7DaysFiles : files have not been created -- Exit") ;
-            e.printStackTrace();
+            log.error("Error in createStage3Last7DaysFiles : files have not been created -- Exit", e) ;
             System.exit(1);
         }
 
@@ -189,8 +187,7 @@ public class Workflow {
         try {
             stage4_1Last7DaysFiles = FileBuilder.createStage4_1Last7DaysFiles(dateString);
         } catch (Exception e) {
-            log.error("Error in createStage4_1Last7DaysFiles : files have not been created -- Exit") ;
-            e.printStackTrace();
+            log.error("Error in createStage4_1Last7DaysFiles : files have not been created -- Exit", e) ;
             System.exit(1);
         }
 
@@ -217,8 +214,7 @@ public class Workflow {
         try {
             stage4_2Last7DaysFiles = FileBuilder.createStage4_2Last7DaysFiles(dateString);
         } catch (Exception e) {
-            log.error("Error in createStage4_2Last7DaysFiles : files have not been created -- Exit") ;
-            e.printStackTrace();
+            log.error("Error in createStage4_2Last7DaysFiles : files have not been created -- Exit", e) ;
             System.exit(1);
         }
 

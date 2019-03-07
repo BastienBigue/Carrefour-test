@@ -36,12 +36,10 @@ public class CACalculator extends FloatReducer {
                     parseAndInsertInMap(currentLine);
                 }
             } catch (FileNotFoundException f) {
-                log.error("CACalculator could not find file : " + inputFile.getName() + "-- Exit");
-                f.printStackTrace();
+                log.error("CACalculator could not find file : " + inputFile.getName() + "-- Exit", f);
                 System.exit(1);
             } catch (IOException e) {
-                log.error("Error when reading file " + inputFile.getName() + "-- Exit");
-                e.printStackTrace();
+                log.error("Error when reading file " + inputFile.getName() + "-- Exit", e);
                 System.exit(1);
             }
         }
@@ -72,12 +70,10 @@ public class CACalculator extends FloatReducer {
                 }
             }
         } catch(FileNotFoundException f) {
-            log.error("CACalculator could not find file : " + refPrixFile.getName() + "-- Exit");
-            f.printStackTrace();
+            log.error("CACalculator could not find file : " + refPrixFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when reading file " + refPrixFile.getName() + "-- Exit");
-            e.printStackTrace();
+            log.error("Error when reading file " + refPrixFile.getName() + "-- Exit", e);
             System.exit(1);
         }
 

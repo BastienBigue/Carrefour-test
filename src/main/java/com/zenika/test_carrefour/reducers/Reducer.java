@@ -46,12 +46,10 @@ public abstract class Reducer<T> {
                     parseAndInsertInMap(currentLine);
                 }
             } catch(FileNotFoundException f) {
-                log.error("Reducer could not find file : " + currFile.getName() + "-- Exit");
-                f.printStackTrace();
+                log.error("Reducer could not find file : " + currFile.getName() + "-- Exit", f);
                 System.exit(1);
             } catch (IOException e) {
-                log.error("Error when reading file " + currFile.getName() + "-- Exit");
-                e.printStackTrace();
+                log.error("Error when reading file " + currFile.getName() + "-- Exit", e);
                 System.exit(1);
             }
         }
@@ -71,12 +69,10 @@ public abstract class Reducer<T> {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("Reducer could not find file : " + outputFullFile.getName() + "-- Exit");
-            f.printStackTrace();
+            log.error("Reducer could not find file : " + outputFullFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when writing file " + outputFullFile.getName() + "-- Exit");
-            e.printStackTrace();
+            log.error("Error when writing file " + outputFullFile.getName() + "-- Exit", e);
             System.exit(1);
         }
         long end = System.currentTimeMillis();
@@ -107,12 +103,10 @@ public abstract class Reducer<T> {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("Reducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit");
-            f.printStackTrace();
+            log.error("Reducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit");
-            e.printStackTrace();
+            log.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit", e);
             System.exit(1);
         }
         long end = System.currentTimeMillis();

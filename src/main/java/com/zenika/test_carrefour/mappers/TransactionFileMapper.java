@@ -57,12 +57,10 @@ public class TransactionFileMapper {
                 currentBuff.close();
             }
         } catch (FileNotFoundException e) {
-            log.error("Error when processing transactionFile : could not find input or output file -- Exit");
-            e.printStackTrace();
+            log.error("Error when processing transactionFile : could not find input or output file -- Exit", e);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when reading " + this.file + "or when writing to one of the stage2 output files -- Exit");
-            e.printStackTrace();
+            log.error("Error when reading " + this.file + "or when writing to one of the stage2 output files -- Exit", e);
             System.exit(1);
         }
         return this.streamMap.keySet();

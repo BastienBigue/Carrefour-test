@@ -39,7 +39,7 @@ public class TestFileGenerator {
         try {
             this.date = this.parseGivenDate();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Error when parsing given date", e);
             System.exit(1);
         }
     }
@@ -54,7 +54,7 @@ public class TestFileGenerator {
         try {
             this.date = this.parseGivenDate();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Error when parsing given date", e);
             System.exit(1);
         }
     }
@@ -99,7 +99,7 @@ public class TestFileGenerator {
                     bo.write(System.lineSeparator().getBytes());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Error when writing to file " + outputFile.getName(), e);
                 System.exit(1);
             }
         }
@@ -140,7 +140,7 @@ public class TestFileGenerator {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Error when writing to file " + outputFile.getName(),e);
                 System.exit(1);
             }
         }
