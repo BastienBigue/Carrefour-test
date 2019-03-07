@@ -74,6 +74,9 @@ public class CACalculator extends FloatReducer {
                     this.productMap.put(product, price);
                     productToRemove.remove(product) ;
                 }
+                else {
+                    LOG.debug("Product " + product + " is present in " + refPrixFile.getName() + " but is not part of transactions.");
+                }
             }
         } catch(FileNotFoundException f) {
             LOG.error("CACalculator could not find file : " + refPrixFile.getName() + "-- Exit", f);
@@ -85,7 +88,7 @@ public class CACalculator extends FloatReducer {
 
         for(String unknownPrice : productToRemove) {
             this.productMap.remove(unknownPrice) ;
-            LOG.info("Removing product " + unknownPrice + "from list because no price has been found in " + this.refPrixFile + " prod file");
+            LOG.info("Removing product " + unknownPrice + " from list because no price has been found in " + this.refPrixFile + " prod file");
         }
         long end = System.currentTimeMillis();
         LOG.debug("Compute CA for " + this.productMap.size() + " products took " + String.valueOf(end-start) + "ms");
