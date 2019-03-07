@@ -8,7 +8,7 @@ import java.util.*;
 
 public class CACalculator extends FloatReducer {
 
-    static Logger log = LogManager.getLogger(CACalculator.class);
+    private static Logger log = LogManager.getLogger(CACalculator.class);
 
     private File refPrixFile ;
 

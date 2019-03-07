@@ -12,7 +12,7 @@ import java.util.Set;
 //This class enables to reduce a set of stage file. It is generic to be able to build Map<String, Integer> (for sales) or Map<String, Float> (for CA).
 public abstract class Reducer<T> {
 
-    static Logger log = LogManager.getLogger(Reducer.class);
+    private static Logger log = LogManager.getLogger(Reducer.class);
 
     protected Set<File> filesToAggregate ;
     protected Map<String, T> productMap ;

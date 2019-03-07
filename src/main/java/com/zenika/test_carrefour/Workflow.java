@@ -23,7 +23,7 @@ public class Workflow {
 
     public Workflow(){}
 
-    static Logger log = LogManager.getLogger(Workflow.class);
+    private static Logger log = LogManager.getLogger(Workflow.class);
 
     //Compute stage1 files
     private Set<String>  computeStage1(File transactionFile) {
@@ -234,7 +234,7 @@ public class Workflow {
     }
 
     //Process the workflow. Based on the stage requested by the user, it only generates the necessary prior stages.
-    void processWorkflow(File transactionFile, int topN, RequestableStage stage) {
+    public void processWorkflow(File transactionFile, int topN, RequestableStage stage) {
 
         long start = System.currentTimeMillis();
 

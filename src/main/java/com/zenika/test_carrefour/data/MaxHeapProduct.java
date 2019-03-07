@@ -7,7 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 public class MaxHeapProduct<T extends Comparable<T>> {
 
-    static Logger log = LogManager.getLogger(MaxHeapProduct.class);
+    private static Logger log = LogManager.getLogger(MaxHeapProduct.class);
 
     private String[] Heap;
     private int size;

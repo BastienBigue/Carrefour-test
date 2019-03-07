@@ -122,11 +122,6 @@ public class WorkflowTest {
     }
 
     @Test
-    public void  testWorkflow7J() {
-
-    }
-
-    @Test
     public void testWorkflowOneDay() {
         File transactionFile = new File("data", TEST_FILE);
         Workflow workflow = new Workflow();
