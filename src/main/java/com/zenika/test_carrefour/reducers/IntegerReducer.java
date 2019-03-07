@@ -1,11 +1,15 @@
 package com.zenika.test_carrefour.reducers;
 
 import com.zenika.test_carrefour.config.CommonConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Set;
 
 public class IntegerReducer extends Reducer<Integer> {
+
+    private static Logger log = LogManager.getLogger(IntegerReducer.class);
 
     public IntegerReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
         super(filesToAggregate, topN, outputFullFile, outputTopNSortedFile);

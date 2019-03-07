@@ -1,12 +1,16 @@
 package com.zenika.test_carrefour.reducers;
 
 import com.zenika.test_carrefour.config.CommonConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Locale;
 import java.util.Set;
 
 public class FloatReducer extends Reducer<Float> {
+
+    private static Logger log = LogManager.getLogger(FloatReducer.class);
 
     public FloatReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
         super(filesToAggregate, topN, outputFullFile, outputTopNSortedFile);
