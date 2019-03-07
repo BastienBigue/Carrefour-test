@@ -104,6 +104,9 @@ Vous pourrez trouver plus de détails dans les commentaires du code source.
 
 ## Tests de performance
 
+Un script de test de performance a été créé pour générer des données de manière aléatoire.
+Il demande le nombre de transactions, le nombre de produits différents et le nombre de magasins.
+
 + Test sur 1 jour ; 1200 magasins ; 10000000 transactions ; 1000000 produits : 8'30"
 + Test sur 1 jour ; 600 magasins ; 10000000 transactions ; 1000000 produits : 5'26
 + Test sur 7 jours ; 500 magasins ; 10000000 transactions ; 500000 produits : 29'00"

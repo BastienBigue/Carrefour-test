@@ -12,7 +12,7 @@ This class is a utilitary to interact with filenames. It can build all the neces
  */
 public class FilenameUtil {
 
-    static Logger log = LogManager.getLogger(FilenameUtil.class);
+    private static Logger LOG = LogManager.getLogger(FilenameUtil.class);
 
     private static final String DATE_REGEXP = "_([0-9]{8})(-J7\\.|\\.)" ;
     private static final String MAGASINID_REGEXP = "([0-9a-fA-F]{8}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{4}\\-[0-9a-fA-F]{12}|GLOBAL)" ;
@@ -96,11 +96,11 @@ public class FilenameUtil {
             } else if (type == FileType.STAGE5_2) {
                 return SET_CA.concat(HYPHEN).concat(GLOBAL).concat(FILENAME_SEPARATOR).concat(date).concat(HYPHEN).concat(J7).concat(DOT).concat(STAGE5_2);
             } else {
-                log.error("Error in filename creation : unknown FileType");
+                LOG.error("Error in filename creation : unknown FileType");
                 System.exit(1);
             }
         }
-        log.error("Error in filename creation : missing date");
+        LOG.error("Error in filename creation : missing date");
         System.exit(1);
         return null;
 
@@ -126,11 +126,11 @@ public class FilenameUtil {
             } else if (type == FileType.RESULT_CA_GLOBAL_7J) {
                 return TOP.concat(FILENAME_SEPARATOR).concat(String.valueOf(topN)).concat(FILENAME_SEPARATOR).concat(CA).concat(FILENAME_SEPARATOR).concat(GLOBAL).concat(FILENAME_SEPARATOR).concat(date).concat(HYPHEN).concat(J7).concat(DOT).concat(DATA);
             } else {
-                log.error("Error in filename creation : unknown FileType");
+                LOG.error("Error in filename creation : unknown FileType");
                 System.exit(1);
             }
         }
-        log.error("Error in filename creation : missing date");
+        LOG.error("Error in filename creation : missing date");
         System.exit(1);
         return null ;
     }

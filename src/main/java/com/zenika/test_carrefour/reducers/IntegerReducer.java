@@ -9,9 +9,12 @@ import java.util.Set;
 
 public class IntegerReducer extends Reducer<Integer> {
 
-    private static Logger log = LogManager.getLogger(IntegerReducer.class);
+    private static Logger LOG = LogManager.getLogger(IntegerReducer.class);
 
-    public IntegerReducer(Set<File> filesToAggregate, int topN, File outputFullFile, File outputTopNSortedFile) {
+    public IntegerReducer(Set<File> filesToAggregate,
+                          int topN,
+                          File outputFullFile,
+                          File outputTopNSortedFile) {
         super(filesToAggregate, topN, outputFullFile, outputTopNSortedFile);
     }
 
@@ -22,7 +25,7 @@ public class IntegerReducer extends Reducer<Integer> {
         try {
             this.productMap.put(product, this.productMap.getOrDefault(product, 0) + Integer.valueOf(currentLine[1]));
         } catch (NumberFormatException e) {
-            log.error("Impossible to parse " + currentLine[1] + "as Integer. Line is discarded.") ;
+            LOG.error("Impossible to parse " + currentLine[1] + "as Integer. Line is discarded.") ;
         }
     }
 

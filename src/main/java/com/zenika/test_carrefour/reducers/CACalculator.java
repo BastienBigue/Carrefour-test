@@ -3,12 +3,18 @@ package com.zenika.test_carrefour.reducers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 
 public class CACalculator extends FloatReducer {
 
-    private static Logger log = LogManager.getLogger(CACalculator.class);
+    private static Logger LOG = LogManager.getLogger(CACalculator.class);
 
     private File refPrixFile ;
 
@@ -24,7 +30,7 @@ public class CACalculator extends FloatReducer {
 
 
         if (this.filesToAggregate.size() != 1) {
-            log.error("There must be only one file to join with the refPrixFile");
+            LOG.error("There must be only one file to join with the refPrixFile");
             System.exit(1);
         } else {
             File inputFile = this.filesToAggregate.iterator().next();
@@ -36,15 +42,15 @@ public class CACalculator extends FloatReducer {
                     parseAndInsertInMap(currentLine);
                 }
             } catch (FileNotFoundException f) {
-                log.error("CACalculator could not find file : " + inputFile.getName() + "-- Exit", f);
+                LOG.error("CACalculator could not find file : " + inputFile.getName() + "-- Exit", f);
                 System.exit(1);
             } catch (IOException e) {
-                log.error("Error when reading file " + inputFile.getName() + "-- Exit", e);
+                LOG.error("Error when reading file " + inputFile.getName() + "-- Exit", e);
                 System.exit(1);
             }
         }
         long end =  System.currentTimeMillis();
-        log.debug("reBuildQteMap using stage1 file took " + String.valueOf(end-start) + "ms");
+        LOG.debug("reBuildQteMap using stage1 file took " + String.valueOf(end-start) + "ms");
     }
 
     //Using Map<product, qte> and refPrixFile, computes CA for each product and stores it in the same map.
@@ -56,7 +62,7 @@ public class CACalculator extends FloatReducer {
         Float unitPrice ;
         String[] currentLine;
 
-        HashSet<String> productToRemove = new HashSet<>(this.productMap.keySet()) ;
+        Set<String> productToRemove = new HashSet<>(this.productMap.keySet()) ;
 
         try (BufferedReader br = new BufferedReader(new FileReader(refPrixFile))) {
             for (String line; (line = br.readLine()) != null; ) {
@@ -70,20 +76,19 @@ public class CACalculator extends FloatReducer {
                 }
             }
         } catch(FileNotFoundException f) {
-            log.error("CACalculator could not find file : " + refPrixFile.getName() + "-- Exit", f);
+            LOG.error("CACalculator could not find file : " + refPrixFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when reading file " + refPrixFile.getName() + "-- Exit", e);
+            LOG.error("Error when reading file " + refPrixFile.getName() + "-- Exit", e);
             System.exit(1);
         }
 
-        for(Iterator<String> it = productToRemove.iterator(); it.hasNext();) {
-            String unknownPrice = it.next() ;
+        for(String unknownPrice : productToRemove) {
             this.productMap.remove(unknownPrice) ;
-            log.info("Removing product " + unknownPrice + "from list because no price has been found in " + this.refPrixFile + " prod file");
+            LOG.info("Removing product " + unknownPrice + "from list because no price has been found in " + this.refPrixFile + " prod file");
         }
         long end = System.currentTimeMillis();
-        log.debug("Compute CA for all products took " + String.valueOf(end-start) + "ms");
+        LOG.debug("Compute CA for " + this.productMap.size() + " products took " + String.valueOf(end-start) + "ms");
     }
 
     //Realize the entire process. Write stage file and result files.

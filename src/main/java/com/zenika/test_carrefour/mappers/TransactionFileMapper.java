@@ -15,7 +15,9 @@ import org.apache.logging.log4j.Logger;
 
 public class TransactionFileMapper {
 
-    static Logger log = LogManager.getLogger(TransactionFileMapper.class);
+    private static Logger LOG = LogManager.getLogger(TransactionFileMapper.class);
+
+    private final static int INITIAL_CAPACITY = 2048; // 1200 magasins
 
     private File file ;
     private String date ;
@@ -23,7 +25,7 @@ public class TransactionFileMapper {
 
     public TransactionFileMapper(File file) {
         this.file = file ;
-        this.streamMap = new HashMap<>(2048) ;
+        this.streamMap = new HashMap<>(INITIAL_CAPACITY) ;
         this.date = FilenameUtil.extractDate(this.file.getName()) ;
     }
 
@@ -52,17 +54,25 @@ public class TransactionFileMapper {
                 outputStream.write(outputLine.getBytes());
                 outputStream.write(System.lineSeparator().getBytes());
             }
-
-            for (BufferedOutputStream currentBuff : this.streamMap.values()) {
-                currentBuff.close();
-            }
         } catch (FileNotFoundException e) {
-            log.error("Error when processing transactionFile : could not find input or output file -- Exit", e);
+            LOG.error("Error when processing transactionFile : could not find input or output file -- Exit", e);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when reading " + this.file + "or when writing to one of the stage2 output files -- Exit", e);
+            LOG.error("Error when reading " + this.file + "or when writing to one of the stage2 output files -- Exit", e);
             System.exit(1);
+        } finally {
+            closeWriters();
         }
         return this.streamMap.keySet();
+    }
+
+    private void closeWriters() {
+        for (BufferedOutputStream currentBuff : this.streamMap.values()) {
+            try {
+                currentBuff.close();
+            } catch (IOException e) {
+                LOG.error("Error while closing buffered output stream");
+            }
+        }
     }
 }

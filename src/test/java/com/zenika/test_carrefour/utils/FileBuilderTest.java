@@ -59,42 +59,42 @@ public class FileBuilderTest {
     }
 
     @Test
-    public void shouldBuildStage4_1File() throws IOException {
+    public void shouldBuildStage41File() throws IOException {
         File file = FileBuilder.createStage4_1File(DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());
     }
 
     @Test
-    public void shouldBuildStage4_2File() throws IOException {
+    public void shouldBuildStage42File() throws IOException {
         File file = FileBuilder.createStage4_2File(DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());
     }
 
     @Test
-    public void shouldBuildStage4_3File() throws IOException {
+    public void shouldBuildStage43File() throws IOException {
         File file = FileBuilder.createStage4_3File(MAGASINID, DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());
     }
 
     @Test
-    public void shouldBuildStage4_4File() throws IOException {
+    public void shouldBuildStage44File() throws IOException {
         File file = FileBuilder.createStage4_4File(MAGASINID, DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());
     }
 
     @Test
-    public void shouldBuildStage5_1File() throws IOException {
+    public void shouldBuildStage51File() throws IOException {
         File file = FileBuilder.createStage5_2File(DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());
     }
 
     @Test
-    public void shouldBuildStage5_2File() throws IOException {
+    public void shouldBuildStage52File() throws IOException {
         File file = FileBuilder.createStage5_1File(DATE_TEST);
         file.createNewFile();
         Assert.assertTrue(file.exists());

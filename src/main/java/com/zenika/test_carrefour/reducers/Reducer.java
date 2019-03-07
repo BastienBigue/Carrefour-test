@@ -12,7 +12,7 @@ import java.util.Set;
 //This class enables to reduce a set of stage file. It is generic to be able to build Map<String, Integer> (for sales) or Map<String, Float> (for CA).
 public abstract class Reducer<T> {
 
-    private static Logger log = LogManager.getLogger(Reducer.class);
+    private static Logger LOG = LogManager.getLogger(Reducer.class);
 
     protected Set<File> filesToAggregate ;
     protected Map<String, T> productMap ;
@@ -46,15 +46,15 @@ public abstract class Reducer<T> {
                     parseAndInsertInMap(currentLine);
                 }
             } catch(FileNotFoundException f) {
-                log.error("Reducer could not find file : " + currFile.getName() + "-- Exit", f);
+                LOG.error("Reducer could not find file : " + currFile.getName() + "-- Exit", f);
                 System.exit(1);
             } catch (IOException e) {
-                log.error("Error when reading file " + currFile.getName() + "-- Exit", e);
+                LOG.error("Error when reading file " + currFile.getName() + "-- Exit", e);
                 System.exit(1);
             }
         }
         long end = System.currentTimeMillis();
-        log.debug("buildMap took " + String.valueOf(end-start) + "ms");
+        LOG.debug("buildMap took " + String.valueOf(end-start) + "ms");
     }
 
     //Writes the entire map to a stage file.
@@ -69,14 +69,14 @@ public abstract class Reducer<T> {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("Reducer could not find file : " + outputFullFile.getName() + "-- Exit", f);
+            LOG.error("Reducer could not find file : " + outputFullFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when writing file " + outputFullFile.getName() + "-- Exit", e);
+            LOG.error("Error when writing file " + outputFullFile.getName() + "-- Exit", e);
             System.exit(1);
         }
         long end = System.currentTimeMillis();
-        log.debug("Write file " + outputFullFile + " took " + String.valueOf(end-start) + "ms");
+        LOG.debug("Write file " + outputFullFile + " took " + String.valueOf(end-start) + "ms");
     }
 
 
@@ -86,7 +86,7 @@ public abstract class Reducer<T> {
         MaxHeapProduct maxHeap = new MaxHeapProduct(productMap) ;
         String[] result = maxHeap.extractTopN(this.topN) ;
         long end = System.currentTimeMillis();
-        log.debug("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
+        LOG.debug("Get Top N elements based on CA took " + String.valueOf(end-start)+ "ms");
         return result ;
     }
 
@@ -103,14 +103,14 @@ public abstract class Reducer<T> {
                 bo.write(System.lineSeparator().getBytes());
             }
         } catch(FileNotFoundException f) {
-            log.error("Reducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit", f);
+            LOG.error("Reducer could not find file : " + outputTopNSortedFile.getName() + "-- Exit", f);
             System.exit(1);
         } catch (IOException e) {
-            log.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit", e);
+            LOG.error("Error when writing file " + outputTopNSortedFile.getName() + "-- Exit", e);
             System.exit(1);
         }
         long end = System.currentTimeMillis();
-        log.debug("Write file " + outputTopNSortedFile + " took " + String.valueOf(end-start)+ "ms");
+        LOG.debug("Write file " + outputTopNSortedFile + " took " + String.valueOf(end-start)+ "ms");
 
     }
 
